@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+.next
+next-env.d.ts
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+*.pem
+.swc
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# Typescript
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Personal files - DO NOT COMMIT
+*.pdf
+*resume*.pdf
+*Resume*.pdf
+Omkar_Haryan_Resume.pdf
+portfolio.html
+portfolio-reference.html
+*.html
+
+# Planning/reference docs (optional - uncomment if you don't want to commit these)
+# REDESIGN_PLAN.md
+# CONTENT_GUIDE.md
