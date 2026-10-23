@@ -7,8 +7,14 @@ export interface Achievement {
 
 export const achievements: Achievement[] = [
   {
+    trophy: '🥈',
+    title: '2nd Runner Up – KOPai Multimodal Study App',
+    org: 'GDG on Campus, IIIT Surat Hackathon',
+    year: '2026',
+  },
+  {
     trophy: '🏆',
-    title: "Winner – Analytrix'26 Datathon",
+    title: "Winner – Analytrix '26 Datathon",
     org: 'Society for Data Science, Thakur College of Engineering, Mumbai',
     year: '2026',
   },
@@ -20,21 +26,27 @@ export const achievements: Achievement[] = [
   },
   {
     trophy: '🥈',
-    title: 'Runner-Up – Consulting Case Competition',
+    title: 'Runner Up – Consulting Case Competition, IES Business School, Mumbai.',
     org: 'IES Business School, Mumbai',
     year: '2025',
   },
   {
     trophy: '🏆',
-    title: 'Winner – ML Quest Hackathon',
-    org: 'GHRCE, Nagpur',
+    title: 'Winner– Best Data Storytelling Pitch',
+    org: 'Avenir Analytics Club, IES Business School, Mumbai',
     year: '2025',
   },
   {
-    trophy: '🏅',
-    title: '4th out of 400+ – Ace The Case',
-    org: 'IIT Bombay',
+    trophy: '🥈',
+    title: 'Second Runner Up– VizAthon: Power BI Visualization Challenge.',
+    org: 'Ei8 Office, Mumbai',
     year: '2025',
+  },
+  {
+    trophy: '🏆',
+    title: 'Winner – ML Quest Hackathon',
+    org: 'G. H. Raisoni College of Engineering, Nagpur',
+    year: '2024',
   },
 ];
 
@@ -62,28 +74,3 @@ export const leadership: Leadership[] = [
     description: 'Engaging with tech firms, startups, and business leaders to secure strategic collaborations.',
   },
 ];
-
-/**
- * TO ADD A NEW ACHIEVEMENT:
- *
- * Add to the achievements array:
- *
-  {
-    trophy: '🏆',  // or '🥈', '🥉', '🏅', '✨'
-    title: 'Achievement Title',
-    org: 'Organization/Event Name',
-    year: '2026',
-  },
- *
- * TO ADD A NEW LEADERSHIP POSITION:
- *
- * Add to the leadership array:
- *
-  {
-    icon: '👑',  // or any emoji
-    role: 'Your Role',
-    org: 'Organization Name',
-    duration: 'Month Year – Present',
-    description: 'What you do in this role',
-  },
- */

@@ -29,9 +29,9 @@ export default function About() {
 
           <div className="flex flex-col gap-7">
             {[
-              { num: '4+', label: 'Case Study Competition Wins', sub: 'Business Strategy · Product · Analytics' },
-              { num: '3', label: 'Internships Completed', sub: 'Data Science · Product · ML Development' },
-              { num: '2', label: 'Leadership Positions', sub: 'Vice Chairperson · Head of Marketing' },
+              { num: '9+', label: 'Case Competitions', sub: 'Strategy · Product · Analytics · Finance' },
+              { num: '5', label: 'Internships Completed', sub: 'ML · Product · Research · Marketing' },
+              { num: '8', label: 'Projects Built', sub: 'AI · Full-Stack · Hackathon · Product' },
               { num: '∞', label: 'L-shaped moves remaining', sub: 'The knight never runs out of angles' },
             ].map((stat, i) => (
               <div key={i} className={`flex items-baseline gap-4 pb-7 ${i < 3 ? 'border-b border-border' : ''}`}>

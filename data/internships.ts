@@ -3,94 +3,99 @@ export interface Internship {
   company: string;
   role: string;
   duration: string;
+  period: string; // short label for timeline e.g. "Jun '24"
   location: string;
   type: 'remote' | 'on-site' | 'hybrid';
   description: string;
   responsibilities: string[];
-  impact: string;
   skills: string[];
-  imageFolder: string; // Folder in public/internships/
+  imageFolder: string;
 }
 
 export const internships: Internship[] = [
   {
     id: 1,
-    company: 'CypherSOL',
-    role: 'Data Science Intern',
-    duration: 'December 2025 – February 2026',
+    company: 'Buzz Entertainment',
+    role: 'Marketing Intern',
+    duration: 'June 2024 – August 2024',
+    period: "Jun '24",
     location: 'Mumbai, India',
     type: 'on-site',
-    description: 'FinTech Startup for Bank Statement Analysis',
+    description: 'Event management company — standup comedy tours, concerts, and summit management.',
     responsibilities: [
-      'Created data automation scripts to clean, consolidate, and process multi-format bank statements for model training',
-      'Developing ML models for category and entity recognition',
-      'Replacing existing rule-based analytics with intelligent ML-driven systems',
+      'Pitched sponsorships for a RAP battle concert to brands and media partners',
+      'Assisted in standup comedy management with star comedian Zakir Khan',
+      'Coordinated logistics and marketing collateral for live events',
     ],
-    impact: 'Reduced manual processing time by 75%, enabling scalable analysis of financial documents',
-    skills: ['Python', 'Pandas', 'Machine Learning', 'Data Processing', 'NLP'],
-    imageFolder: 'cyphersol',
+    skills: ['Sponsorship Pitching', 'Event Marketing', 'Brand Partnerships', 'Client Management'],
+    imageFolder: 'buzz',
   },
   {
     id: 2,
-    company: 'Bigul',
-    role: 'Product Management Intern',
-    duration: 'November 2025 – December 2025',
+    company: 'IIT Bombay – KCDH Lab',
+    role: 'ML Research Intern',
+    duration: 'April 2025 – May 2025',
+    period: "Apr '25",
     location: 'Mumbai, India',
-    type: 'remote',
-    description: 'Algo Trading Platform',
+    type: 'on-site',
+    description: 'Koita Centre for Digital Health — research in non-invasive medical diagnostics using ML.',
     responsibilities: [
-      'Benchmarked competitor apps to highlight feature gaps and guide product roadmap decisions',
-      'Identified key UX issues across trading and algo features',
-      'Recommended improvements to reduce user friction',
+      'Explored non-invasive hemoglobin estimation by analysing scleral blood vessel images',
+      'Applied image processing and ML techniques to study correlations between vessel features and blood data',
+      'Evaluated feasibility of a low-cost diagnostic method using imaging and statistical analysis',
     ],
-    impact: 'Influenced 3 major feature additions and 12 UX improvements for Q1 2026 roadmap',
-    skills: ['Product Management', 'Competitive Analysis', 'UX Research', 'Roadmapping'],
-    imageFolder: 'bigul',
+    skills: ['Python', 'Image Processing', 'Machine Learning', 'Medical AI', 'Research'],
+    imageFolder: 'iitb-kcdh',
   },
   {
     id: 3,
     company: 'Sereno Volante Software Services',
-    role: 'ML Developer Intern',
+    role: 'Machine Learning Engineer Intern',
     duration: 'June 2025 – August 2025',
+    period: "Jun '25",
     location: 'Mumbai, India',
     type: 'remote',
-    description: 'Industrial AI & Automation Solutions',
+    description: 'Industrial AI & automation solutions for large-scale manufacturing clients.',
     responsibilities: [
-      'Improved efficiency and reduced engineering effort in manufacturing workflows',
-      'Delivered AI and automation solutions to industrial clients (JSW Steel, Abhijeet Plastics)',
-      'Worked in a consulting capacity on production-level implementations',
+      'Partnered with JSW and Abhijeet on AI-driven automation projects including a sales analytics chatbot and a CAD tool for design validation',
+      'Developed end-to-end ML systems from researching libraries to building data pipelines',
+      'Gained hands-on experience with production workflows, virtual environments, and client-facing solutions',
     ],
-    impact: 'Delivered solutions that improved manufacturing efficiency by 35% for client operations',
-    skills: ['Machine Learning', 'Python', 'Industrial Automation', 'Consulting'],
+    skills: ['Machine Learning', 'Python', 'Data Pipelines', 'Industrial Automation', 'Client Solutions'],
     imageFolder: 'sereno-volante',
   },
-];
-
-/**
- * TO ADD A NEW INTERNSHIP:
- *
- * 1. Copy the template below
- * 2. Increment the id number
- * 3. Fill in your details
- * 4. Add images to public/internships/[company-folder]/
- *
- * TEMPLATE:
- *
   {
     id: 4,
-    company: 'Company Name',
-    role: 'Your Role/Title',
-    duration: 'Month Year – Month Year',
-    location: 'City, Country',
-    type: 'remote',  // or 'on-site', 'hybrid'
-    description: 'Short company/product description',
+    company: 'Bigul',
+    role: 'Product Management Intern',
+    duration: 'November 2025 – December 2025',
+    period: "Nov '25",
+    location: 'Mumbai, India',
+    type: 'remote',
+    description: 'Algo trading platform — product strategy and UX research.',
     responsibilities: [
-      'Responsibility 1',
-      'Responsibility 2',
-      'Responsibility 3',
+      'Benchmarked competitor apps to highlight feature gaps and guide product roadmap decisions',
+      'Identified key UX issues across trading and algo features',
+      'Recommended improvements to reduce user friction across core flows',
     ],
-    impact: 'Quantifiable impact you made',
-    skills: ['Skill1', 'Skill2', 'Skill3'],
-    imageFolder: 'company-name-lowercase',
+    skills: ['Product Management', 'Competitive Analysis', 'UX Research', 'Roadmapping'],
+    imageFolder: 'bigul',
   },
- */
+  {
+    id: 5,
+    company: 'CypherSOL',
+    role: 'Data Science Intern',
+    duration: 'December 2025 – February 2026',
+    period: "Dec '25",
+    location: 'Mumbai, India',
+    type: 'on-site',
+    description: 'FinTech startup — AI-driven bank statement analysis and financial intelligence.',
+    responsibilities: [
+      'Created data automation scripts to clean, consolidate, and process multi-format bank statements',
+      'Developing ML models for transaction category and entity recognition',
+      'Replacing rule-based analytics with intelligent ML-driven classification systems',
+    ],
+    skills: ['Python', 'Pandas', 'Machine Learning', 'NLP', 'Data Processing'],
+    imageFolder: 'cyphersol',
+  },
+];

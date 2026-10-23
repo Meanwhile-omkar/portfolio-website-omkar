@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { projects } from '@/data/projects';
-import { Code2, Zap, Package, FlaskRound } from 'lucide-react';
-
-type FilterType = 'all' | 'technical' | 'hackathon' | 'product' | 'research';
+import { Code2, Zap, Package, FlaskRound, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const typeIcons = {
   tech: Code2,
@@ -14,11 +12,15 @@ const typeIcons = {
   research: FlaskRound,
 };
 
+const PAGE_SIZE = 4;
+
 export default function Projects() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [page, setPage] = useState(0);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [projectImages, setProjectImages] = useState<Record<string, string[]>>({});
 
+  const totalPages = Math.ceil(projects.length / PAGE_SIZE);
+  const visible = projects.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const selectedData = projects.find((p) => p.id === selectedProject);
 
   useEffect(() => {
@@ -36,58 +38,52 @@ export default function Projects() {
     loadImages();
   }, []);
 
-  const filtered = projects.filter((p) => {
-    if (activeFilter === 'all') return true;
-    if (activeFilter === 'technical') return p.typeColor === 'tech';
-    if (activeFilter === 'hackathon') return p.typeColor === 'hack';
-    if (activeFilter === 'product') return p.typeColor === 'strategy';
-    if (activeFilter === 'research') return p.typeColor === 'research';
-    return true;
-  });
-
   return (
     <>
       <section id="projects" className="relative py-36 bg-deep border-t border-border z-10">
         <div className="max-w-[1100px] mx-auto px-12">
-          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-4 flex items-center gap-3">
-            05 / Projects
-            <span className="flex-1 max-w-[60px] h-[1px] bg-gold opacity-40"></span>
-          </p>
-          <h2 className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-[1.0] tracking-[-0.02em] text-cream mb-12">
-            Things I've <em className="italic text-gold">built</em>
-          </h2>
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-4 flex items-center gap-3">
+                05 / Projects
+                <span className="flex-1 max-w-[60px] h-[1px] bg-gold opacity-40"></span>
+              </p>
+              <h2 className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-[1.0] tracking-[-0.02em] text-cream">
+                Things I&apos;ve <em className="italic text-gold">built</em>
+              </h2>
+            </div>
 
-          {/* Filter Tabs */}
-          <div className="flex gap-1 bg-surface border border-border rounded-full p-1 w-fit mb-12">
-            {[
-              { key: 'all', label: 'ALL' },
-              { key: 'technical', label: 'TECHNICAL' },
-              { key: 'hackathon', label: 'HACKATHON' },
-              { key: 'product', label: 'PRODUCT' },
-            ].map((filter) => (
+            {/* Pagination controls */}
+            <div className="flex items-center gap-3 pb-2">
               <button
-                key={filter.key}
-                onClick={() => setActiveFilter(filter.key as FilterType)}
-                className={`px-6 py-2 rounded-full font-mono text-[11px] tracking-[0.1em] uppercase transition-all duration-300 ${
-                  activeFilter === filter.key
-                    ? 'bg-gold-dim text-gold'
-                    : 'text-cream-dim hover:text-cream'
-                }`}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="w-9 h-9 flex items-center justify-center rounded border border-border text-cream-dim hover:border-gold/50 hover:text-gold transition-all disabled:opacity-25 disabled:cursor-not-allowed"
               >
-                {filter.label}
+                <ChevronLeft size={16} />
               </button>
-            ))}
+              <span className="font-mono text-[11px] text-cream-dim tracking-wider">
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page === totalPages - 1}
+                className="w-9 h-9 flex items-center justify-center rounded border border-border text-cream-dim hover:border-gold/50 hover:text-gold transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map((project) => {
+          {/* Cards Grid — 2×2 = 4 visible */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {visible.map((project) => {
               const Icon = typeIcons[project.typeColor as keyof typeof typeIcons];
               return (
                 <button
                   key={project.id}
                   onClick={() => setSelectedProject(project.id)}
-                  className="relative bg-surface border border-border rounded p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(201,168,76,0.25)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-gold after:to-transparent after:scale-x-0 after:origin-left hover:after:scale-x-100 after:transition-transform after:duration-400"
+                  className="group relative bg-surface border border-border rounded p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(201,168,76,0.25)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-gold after:to-transparent after:scale-x-0 after:origin-left hover:after:scale-x-100 after:transition-transform after:duration-400"
                 >
                   <p className={`font-mono text-[9px] tracking-[0.2em] uppercase mb-4 flex items-center gap-2 ${
                     project.typeColor === 'tech' ? 'text-tech-blue' :
@@ -112,14 +108,30 @@ export default function Projects() {
                     ))}
                     {project.stack.length > 4 && <span className="font-mono text-[9px] text-[rgba(245,239,224,0.35)]">+{project.stack.length - 4}</span>}
                   </div>
+                  <div className="flex items-center gap-2 mt-5 text-gold text-[11px] font-mono tracking-wider uppercase">
+                    Click for details
+                    <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                  </div>
                 </button>
               );
             })}
           </div>
+
+          {/* Page dots */}
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  i === page ? 'w-6 bg-gold' : 'w-2 bg-border hover:bg-gold/40'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Modal (same as before but with icons) */}
       {selectedProject && selectedData && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-8 overflow-y-auto" onClick={() => setSelectedProject(null)}>
           <div className="bg-surface border border-gold/30 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto my-8" onClick={(e) => e.stopPropagation()}>
@@ -139,7 +151,7 @@ export default function Projects() {
                   <p className={`font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2 ${
                     selectedData.typeColor === 'tech' ? 'text-tech-blue' : selectedData.typeColor === 'strategy' ? 'text-gold' : selectedData.typeColor === 'research' ? 'text-[#10b981]' : 'text-[#a855f7]'
                   }`}>
-                    {React.createElement(typeIcons[selectedData.typeColor as keyof typeof typeIcons], { size: 12 })}
+                    {(() => { const ModalIcon = typeIcons[selectedData.typeColor as keyof typeof typeIcons]; return <ModalIcon size={12} />; })()}
                     {selectedData.type}
                   </p>
                   <h3 className="font-display text-3xl font-bold text-cream leading-tight">{selectedData.name}</h3>
@@ -165,7 +177,7 @@ export default function Projects() {
                     ))}
                   </div>
                 </div>
-                {Object.keys(selectedData.links).length > 0 && (
+                {(selectedData.links.demo || selectedData.links.github) && (
                   <div className="flex gap-3 pt-4">
                     {selectedData.links.demo && (
                       <a href={selectedData.links.demo} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 bg-gold text-black font-mono text-[11px] tracking-wider uppercase rounded hover:bg-gold-light transition-colors flex items-center gap-2">

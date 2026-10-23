@@ -1,5 +1,7 @@
 'use client';
 
+import { Laptop } from 'lucide-react';
+
 export default function Worlds() {
   return (
     <section id="worlds" className="relative py-36 bg-black border-t border-border z-10">
@@ -17,7 +19,7 @@ export default function Worlds() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0.5">
           <div className="group relative p-16 min-h-[480px] overflow-hidden bg-[rgba(74,158,255,0.03)] border border-[rgba(74,158,255,0.12)] transition-all duration-400 hover:-translate-y-1 before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top_left,rgba(74,158,255,0.08)_0%,transparent_70%)] before:opacity-0 hover:before:opacity-100 before:transition-opacity">
-            <span className="text-4xl mb-6 block w-1.5 h-1.5 rounded-full bg-tech-blue"></span>
+            <Laptop size={32} className="text-tech-blue mb-6" strokeWidth={1.5} />
             <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-tech-blue mb-3">Technical Domain</p>
             <h3 className="font-display text-[32px] font-bold text-cream mb-5 leading-[1.1]">
               Data Science<br />& Engineering

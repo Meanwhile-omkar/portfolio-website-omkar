@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { caseStudies } from '@/data/caseStudies';
-import { Award, TrendingUp, Users } from 'lucide-react';
+import { Award, TrendingUp, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 
-type FilterType = 'all' | 'winner' | 'top3' | 'finalist';
+const PAGE_SIZE = 4;
 
 export default function CaseStudies() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [page, setPage] = useState(0);
   const [selectedCase, setSelectedCase] = useState<number | null>(null);
   const [caseImages, setCaseImages] = useState<Record<string, string[]>>({});
 
+  const totalPages = Math.ceil(caseStudies.length / PAGE_SIZE);
+  const visible = caseStudies.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const selectedData = caseStudies.find((c) => c.id === selectedCase);
 
   useEffect(() => {
@@ -29,62 +31,52 @@ export default function CaseStudies() {
     loadImages();
   }, []);
 
-  const filtered = caseStudies.filter((c) => {
-    if (activeFilter === 'all') return true;
-    if (activeFilter === 'winner') return c.badgeStyle === 'win';
-    if (activeFilter === 'top3') return c.rank.includes('#') && parseInt(c.rank.slice(1)) <= 3;
-    if (activeFilter === 'finalist') return c.badgeStyle === 'finalist';
-    return true;
-  });
-
   return (
     <>
       <section id="case-studies" className="relative py-36 bg-black border-t border-border z-10">
         <div className="max-w-[1100px] mx-auto px-12">
-          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-4 flex items-center gap-3">
-            03 / Case Competitions
-            <span className="flex-1 max-w-[60px] h-[1px] bg-gold opacity-40"></span>
-          </p>
-          <h2 className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-[1.0] tracking-[-0.02em] text-cream mb-12">
-            Where the <em className="italic text-gold">knight</em><br />made its move
-          </h2>
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-4 flex items-center gap-3">
+                03 / Case Competitions
+                <span className="flex-1 max-w-[60px] h-[1px] bg-gold opacity-40"></span>
+              </p>
+              <h2 className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-[1.0] tracking-[-0.02em] text-cream">
+                Where the <em className="italic text-gold">knight</em><br />made its move
+              </h2>
+            </div>
 
-          {/* Filter Tabs */}
-          <div className="flex gap-1 bg-surface border border-border rounded-full p-1 w-fit mb-12">
-            {[
-              { key: 'all', label: 'ALL' },
-              { key: 'winner', label: 'WINNERS' },
-              { key: 'top3', label: 'TOP 3' },
-              { key: 'finalist', label: 'FINALISTS' },
-            ].map((filter) => (
+            {/* Pagination controls */}
+            <div className="flex items-center gap-3 pb-2">
               <button
-                key={filter.key}
-                onClick={() => setActiveFilter(filter.key as FilterType)}
-                className={`px-6 py-2 rounded-full font-mono text-[11px] tracking-[0.1em] uppercase transition-all duration-300 ${
-                  activeFilter === filter.key
-                    ? 'bg-gold-dim text-gold'
-                    : 'text-cream-dim hover:text-cream'
-                }`}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="w-9 h-9 flex items-center justify-center rounded border border-border text-cream-dim hover:border-gold/50 hover:text-gold transition-all disabled:opacity-25 disabled:cursor-not-allowed"
               >
-                {filter.label}
+                <ChevronLeft size={16} />
               </button>
-            ))}
+              <span className="font-mono text-[11px] text-cream-dim tracking-wider">
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page === totalPages - 1}
+                className="w-9 h-9 flex items-center justify-center rounded border border-border text-cream-dim hover:border-gold/50 hover:text-gold transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
 
-          {/* Cards Grid */}
+          {/* Cards Grid — always 2 cols, 2 rows = 4 visible */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {filtered.map((caseItem) => (
+            {visible.map((caseItem) => (
               <button
                 key={caseItem.id}
                 onClick={() => setSelectedCase(caseItem.id)}
                 className="group relative bg-surface border border-border rounded p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:shadow-[0_20px_60px_rgba(201,168,76,0.2)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-gold after:to-transparent after:scale-x-0 after:origin-left hover:after:scale-x-100 after:transition-transform after:duration-400"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`font-display text-4xl font-black italic leading-none ${
-                    caseItem.badgeStyle === 'win' ? 'text-gold' : 'text-gold/30'
-                  }`}>
-                    {caseItem.rank}
-                  </div>
                   <span className={`font-mono text-[10px] tracking-[0.1em] uppercase px-3 py-1.5 rounded whitespace-nowrap ${
                     caseItem.badgeStyle === 'win' ? 'bg-gold/12 text-gold border border-gold/30' :
                     caseItem.badgeStyle === 'runner-up' ? 'bg-cream/8 text-cream-dim border border-border' :
@@ -109,6 +101,19 @@ export default function CaseStudies() {
                   <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </div>
               </button>
+            ))}
+          </div>
+
+          {/* Page dots */}
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  i === page ? 'w-6 bg-gold' : 'w-2 bg-border hover:bg-gold/40'
+                }`}
+              />
             ))}
           </div>
         </div>
@@ -137,15 +142,12 @@ export default function CaseStudies() {
             <div className="p-10">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <span className="font-display text-3xl font-black italic text-gold">{selectedData.rank}</span>
-                    <span className={`font-mono text-[10px] tracking-[0.1em] uppercase px-3 py-1.5 rounded ${
-                      selectedData.badgeStyle === 'win' ? 'bg-gold/12 text-gold border border-gold/30' :
-                      'bg-cream/8 text-cream-dim border border-border'
-                    }`}>
-                      {selectedData.badge}
-                    </span>
-                  </div>
+                  <span className={`font-mono text-[10px] tracking-[0.1em] uppercase px-3 py-1.5 rounded mb-3 inline-block ${
+                    selectedData.badgeStyle === 'win' ? 'bg-gold/12 text-gold border border-gold/30' :
+                    'bg-cream/8 text-cream-dim border border-border'
+                  }`}>
+                    {selectedData.badge}
+                  </span>
                   <h3 className="font-display text-3xl font-bold text-cream leading-tight mb-2">{selectedData.title}</h3>
                   <p className="text-sm text-cream-dim">{selectedData.meta}</p>
                 </div>
@@ -167,14 +169,6 @@ export default function CaseStudies() {
                   </div>
                 ))}
               </div>
-
-              {selectedData.pptLink && (
-                <div className="mt-6">
-                  <a href={selectedData.pptLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-black font-mono text-[11px] tracking-wider uppercase rounded hover:bg-gold-light transition-colors">
-                    <Award size={14} /> View Presentation
-                  </a>
-                </div>
-              )}
             </div>
           </div>
         </div>
