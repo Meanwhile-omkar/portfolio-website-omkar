@@ -62,7 +62,7 @@ export const caseStudies: CaseStudy[] = [
     problem: "A multi-region retailer with falling margins and uneven sales across regions and categories.",
     approach: "Cut weak SKUs using the data, ran campaigns per sales channel, and moved inventory toward high-margin categories.",
     result: "Runner-up. Projected: 18% better margins and 25% less dead stock.",
-    images: ["/photos/wins/ies-case-win.jpg"],
+    images: ["/photos/cases/ies-case-win.jpg"],
     links: [{ label: "see the deck", href: "https://drive.google.com/file/d/1J_sdxmgLxNNlMn6-Q2RsxqcEUtGUiXsR/view?usp=sharing" }],
     sleeve: { color: "#ffc700", icon: "cart" },
   },
