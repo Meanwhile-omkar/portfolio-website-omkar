@@ -44,17 +44,20 @@ export default function BookWindow({ project, index, total, dir, firstOpen }: Pr
           <motion.div
             key={project.id}
             custom={dir}
-            className="relative grid max-h-[78vh] overflow-y-auto rounded-[6px] shadow-lift md:max-h-none md:overflow-visible min-[860px]:h-[min(68vh,620px)] min-[860px]:grid-cols-2"
-            style={RULED}
+            // Each page carries its own paper: while the cover is closed there is nothing on the left.
+            className={`relative grid max-h-[calc(100vh-130px)] overflow-y-auto rounded-[6px] min-[860px]:h-[min(calc(100vh-140px),680px)] min-[860px]:grid-cols-2 min-[860px]:grid-rows-[minmax(0,1fr)] min-[860px]:overflow-visible ${animateCover ? "" : "shadow-lift"}`}
             initial={firstOpen ? false : reduce ? { opacity: 0 } : { opacity: 0, x: dir * 50, rotateY: dir * 10 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, x: dir * -50, rotateY: dir * -10 }}
             transition={{ duration: 0.28, ease: [0.3, 0.7, 0.2, 1] }}
           >
-            <div className="relative" style={{ opacity: animateCover ? 0 : 1 }}>
+            <div className="relative min-h-0 rounded-l-[6px]" style={{ ...RULED, visibility: animateCover ? "hidden" : "visible" }}>
               <LeftPage project={project} index={index} total={total} />
             </div>
-            <div className="relative border-t border-ink/10 min-[860px]:border-l min-[860px]:border-t-0">
+            <div
+              className={`relative min-h-0 border-t border-ink/10 min-[860px]:rounded-r-[6px] min-[860px]:border-l min-[860px]:border-t-0 ${animateCover ? "shadow-lift" : ""}`}
+              style={RULED}
+            >
               <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-10 bg-gradient-to-r from-[rgba(29,29,31,0.07)] to-transparent min-[860px]:block" />
               <RightPage project={project} />
             </div>
@@ -110,16 +113,16 @@ function Cover({ project }: { project: Project }) {
 function LeftPage({ project, index, total }: { project: Project; index: number; total: number }) {
   const c = project.spine.color;
   return (
-    <div className="flex h-full flex-col px-7 pb-6 pt-8 sm:px-10">
-      <h3 className="font-marker text-[clamp(48px,5.4vw,76px)] leading-[0.82] text-ink">
+    <div className="flex h-full min-h-0 flex-col px-7 pb-5 pt-7 sm:px-10">
+      <h3 className="font-marker text-[clamp(42px,4.6vw,66px)] leading-[0.84] text-ink">
         <span className="hl" style={{ ["--hl" as string]: `${c}55` }}>
           {project.name}
         </span>
       </h3>
-      <p className="mt-3 font-note text-[18px] text-ink-soft">{project.tagline}</p>
+      <p className="mt-3 font-note text-[17px] leading-snug text-ink-soft">{project.tagline}</p>
 
-      <div className="relative my-5 flex flex-1 items-center justify-center">
-        <Doodle name={project.spine.icon} color={c} size="min(170px, 26vh)" seed={11} />
+      <div className="relative my-4 flex min-h-[70px] flex-1 items-center justify-center overflow-hidden">
+        <Doodle name={project.spine.icon} color={c} size="min(150px, 17vh)" seed={11} />
       </div>
 
       <ul className="flex flex-wrap gap-2.5" aria-label="Built with">
@@ -134,7 +137,7 @@ function LeftPage({ project, index, total }: { project: Project; index: number; 
         ))}
       </ul>
       {project.links.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2.5">
+        <div className="mt-3.5 flex flex-wrap gap-2.5">
           {project.links.map((l, i) => (
             <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className={i === 0 ? "btn-blue !py-1.5 !text-[14px]" : "btn-ghost !py-1.5 !text-[14px]"}>
               {l.label}
@@ -142,7 +145,7 @@ function LeftPage({ project, index, total }: { project: Project; index: number; 
           ))}
         </div>
       )}
-      <p className="mt-5 font-note text-[14px] text-ink-faint">
+      <p className="mt-4 font-note text-[14px] text-ink-faint">
         book {index + 1} of {total}
       </p>
     </div>
@@ -152,16 +155,16 @@ function LeftPage({ project, index, total }: { project: Project; index: number; 
 function RightPage({ project }: { project: Project }) {
   const c = project.spine.color;
   return (
-    <div className="flex h-full flex-col overflow-y-auto px-7 pb-8 pt-8 sm:px-10" data-lenis-prevent>
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto px-7 pb-6 pt-7 sm:px-10" data-lenis-prevent>
       <PageHeading color={c}>what it is</PageHeading>
-      <p className="mt-2 max-w-[52ch] text-[16px] leading-relaxed text-ink-soft">{project.what}</p>
+      <p className="mt-2 max-w-[56ch] text-[15px] leading-[1.6] text-ink-soft">{project.what}</p>
 
-      <PageHeading color={c} className="mt-6">
+      <PageHeading color={c} className="mt-5">
         how it works
       </PageHeading>
-      <ol className="mt-2 space-y-3">
+      <ol className="mt-2.5 space-y-2.5">
         {project.how.map((step, i) => (
-          <li key={i} className="flex gap-3 text-[15.5px] leading-relaxed text-ink-soft">
+          <li key={i} className="flex gap-3 text-[15px] leading-[1.55] text-ink-soft">
             <span className="relative mt-0.5 grid h-7 w-7 shrink-0 place-items-center font-marker text-[22px] text-ink">
               <Sketch w={28} h={28} seed={i + 3} className="absolute inset-0 h-7 w-7" shapes={[{ t: "ellipse", cx: 14, cy: 14, w: 26, h: 26, o: { strokeWidth: 1.6 } }]} />
               <span className="relative">{i + 1}</span>
@@ -171,10 +174,10 @@ function RightPage({ project }: { project: Project }) {
         ))}
       </ol>
 
-      <div className="mt-auto pt-6">
-        <div className="relative rotate-[-1.2deg] bg-[#fff1b8] px-5 py-4 shadow-paper">
-          <p className="font-marker text-[24px] leading-none text-ink">what came out of it</p>
-          <p className="mt-1.5 font-note text-[17px] leading-snug text-ink">{project.result}</p>
+      <div className="mt-auto pt-5">
+        <div className="relative rotate-[-1.2deg] bg-[#fff1b8] px-5 py-3.5 shadow-paper">
+          <p className="font-marker text-[23px] leading-none text-ink">what came out of it</p>
+          <p className="mt-1.5 font-note text-[16px] leading-snug text-ink">{project.result}</p>
         </div>
       </div>
     </div>
