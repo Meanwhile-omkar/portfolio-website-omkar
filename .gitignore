@@ -65,3 +65,6 @@ portfolio-reference.html
 
 # Original art (sticker sheets, character PNGs). Large; the site ships the cut-down WebPs in public/.
 assets-src/
+
+# Search Console verification file must be deployed (the rule above ignores *.html)
+!public/google*.html
