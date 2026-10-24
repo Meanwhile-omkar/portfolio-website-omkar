@@ -17,7 +17,9 @@ import RecordWindow from "./RecordWindow";
 import { Bookend, FlatStack, Frame, Plank } from "./ShelfBits";
 
 const W = 1200;
-const books = [...projects.filter((p) => p.shelf === "built"), ...projects.filter((p) => p.shelf === "hackathon")];
+// Books keep the data order (Omkar's priority). The top shelf holds the first six.
+const books = projects;
+const TOP_SHELF = 6;
 const rnd = jitter(42);
 const sleeveTilts = caseStudies.map(() => Math.round((rnd() * 2 - 1) * 4));
 
@@ -67,8 +69,7 @@ export default function Library() {
     return open.kind === "book" ? books[i].name : caseStudies[i].title;
   };
 
-  const shelf = (kind: "built" | "hackathon") =>
-    books.map((p, i) => ({ p, i })).filter(({ p }) => p.shelf === kind);
+  const shelf = (row: "top" | "bottom") => books.map((p, i) => ({ p, i })).filter(({ i }) => (row === "top" ? i < TOP_SHELF : i >= TOP_SHELF));
 
   return (
     <section id="library" aria-labelledby="library-title" className="relative scroll-mt-20 py-28 md:py-36">
@@ -80,16 +81,16 @@ export default function Library() {
 
       <div className="mx-auto mt-14 max-w-[1200px] px-3 sm:px-5">
         <ScaleStage width={W} height={1800}>
-          {/* ── Shelf 1: things I built ── */}
+          {/* ── Shelf 1: the strongest six ── */}
           <div className="absolute inset-x-0 top-0 h-[400px]">
             <div className="absolute bottom-[26px] left-[40px] flex items-end gap-[14px]">
               <Doodle name="plant" color="#ef5533" size={128} seed={2} className="mr-6" />
-              {shelf("built").map(({ p, i }, k) => (
+              {shelf("top").map(({ p, i }, k) => (
                 <BookSlot key={p.id} id={p.id} active={active === p.id} flip={false} teaser={p.teaser} name={p.name}>
                   <BookSpine
                     project={p}
                     seed={i + 10}
-                    lean={k === 4 ? 7 : 0}
+                    lean={k === TOP_SHELF - 1 ? 7 : 0}
                     active={active === p.id}
                     onActivate={activate(p.id)}
                     onOpen={(_, ptr) => tryOpen("book", i, p.id, ptr)}
@@ -106,16 +107,16 @@ export default function Library() {
             <div className="absolute bottom-0 left-0 right-0 h-[26px]">
               <Plank width={W} seed={1} />
             </div>
-            <ShelfLabel className="left-[120px]">things I built</ShelfLabel>
+            <ShelfLabel className="left-[120px]">start here: my best work</ShelfLabel>
           </div>
 
-          {/* ── Shelf 2: built at hackathons ── */}
+          {/* ── Shelf 2: the rest ── */}
           <div className="absolute inset-x-0 top-[460px] h-[400px]">
             <div className="absolute bottom-[26px] left-[60px] flex items-end gap-[14px]">
               <div className="mr-6">
                 <FlatStack seed={9} />
               </div>
-              {shelf("hackathon").map(({ p, i }, k) => (
+              {shelf("bottom").map(({ p, i }, k) => (
                 <BookSlot key={p.id} id={p.id} active={active === p.id} flip={false} teaser={p.teaser} name={p.name}>
                   <BookSpine
                     project={p}
@@ -134,7 +135,7 @@ export default function Library() {
             <div className="absolute bottom-0 left-0 right-0 h-[26px]">
               <Plank width={W} seed={2} />
             </div>
-            <ShelfLabel className="left-[300px]">built at hackathons</ShelfLabel>
+            <ShelfLabel className="left-[300px]">more things I built</ShelfLabel>
           </div>
 
           {/* ── Records: three shorter shelves grouped by result, so the sleeves can breathe ── */}
