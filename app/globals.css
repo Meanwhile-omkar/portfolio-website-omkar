@@ -110,10 +110,6 @@
   .marquee-track[data-reverse="true"] {
     animation-direction: reverse;
   }
-  .marquee:hover .marquee-track,
-  .marquee:focus-within .marquee-track {
-    animation-play-state: paused;
-  }
   .bob {
     animation: bob var(--bob-dur, 6s) ease-in-out infinite;
     animation-delay: var(--bob-delay, 0s);
