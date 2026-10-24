@@ -1,8 +1,8 @@
 export type Place = "Winner" | "Runner-up" | "2nd Runner-up";
 
-// From the résumé: 13 podium finishes across national hackathons and case competitions in total.
+// From the résumé: 13 podium finishes, plus the Vega Hackathon win (Feb 2026) = 14 across national hackathons and case competitions in total.
 // The list below is the ones written up so far.
-export const podiumTotal = 13;
+export const podiumTotal = 14;
 
 export const recognitions = ["Top 1,000 students worldwide on Unstop (Feb 2025)"];
 
@@ -15,6 +15,7 @@ export interface Achievement {
 }
 
 export const achievements: Achievement[] = [
+  { title: "Vega Hackathon", place: "Winner", kind: "hackathon", host: "Pratishtha", year: 2026 },
   { title: "KOPai study app", place: "2nd Runner-up", kind: "hackathon", host: "GDG on Campus, IIIT Surat", year: 2026 },
   { title: "Analytrix '26 Datathon", place: "Winner", kind: "data", host: "Thakur College of Engineering, Mumbai", year: 2026 },
   { title: "Spotify case study", place: "Winner", kind: "case", host: "Datazen, KJ Somaiya College, Mumbai", year: 2026 },
