@@ -12,12 +12,13 @@ type Props = { study: CaseStudy; index: number; total: number; dir: number; firs
 export default function RecordWindow({ study, index, total, dir, firstOpen }: Props) {
   const reduce = useReducedMotion();
   const c = study.sleeve.color;
+  const hasPhotos = study.images.length > 0;
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={study.id}
-        className="relative grid max-h-[78vh] w-full overflow-y-auto rounded-[6px] bg-white shadow-lift min-[860px]:max-h-none min-[860px]:grid-cols-[0.95fr_1.05fr] min-[860px]:overflow-visible"
+        className="relative grid max-h-[calc(100vh-130px)] w-full overflow-y-auto rounded-[6px] bg-white shadow-lift min-[860px]:h-[min(calc(100vh-140px),660px)] min-[860px]:grid-cols-[0.95fr_1.05fr] min-[860px]:grid-rows-[minmax(0,1fr)] min-[860px]:overflow-visible"
         initial={firstOpen && !reduce ? { opacity: 0, scale: 0.94 } : reduce ? { opacity: 0 } : { opacity: 0, x: dir * 50 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         exit={reduce ? { opacity: 0 } : { opacity: 0, x: dir * -50 }}
@@ -25,8 +26,8 @@ export default function RecordWindow({ study, index, total, dir, firstOpen }: Pr
         data-lenis-prevent
       >
         {/* Sleeve opens, record slides out and keeps spinning */}
-        <div className="section-mist relative flex items-center justify-center overflow-hidden px-6 py-10 min-[860px]:py-0">
-          <div className="relative aspect-square w-[min(64%,300px)]">
+        <div className="section-mist relative flex min-h-0 flex-col items-center justify-center gap-6 overflow-hidden rounded-l-[6px] px-6 py-10 min-[860px]:py-8">
+          <div className={`relative aspect-square ${hasPhotos ? "w-[min(52%,250px)]" : "w-[min(64%,300px)]"}`}>
             <motion.div
               className="absolute inset-[4%]"
               initial={reduce ? false : { x: "0%" }}
@@ -57,10 +58,27 @@ export default function RecordWindow({ study, index, total, dir, firstOpen }: Pr
               <BadgeSticker badge={study.badge} field={study.field} size={92} tilt={12} className="absolute -right-6 -top-6" />
             </motion.div>
           </div>
+
+          {/* photos from the day, pinned under the record like postcards */}
+          {hasPhotos && (
+            <div className="relative flex w-full max-w-[420px] justify-center">
+              {study.images.slice(0, 3).map((src, i) => (
+                <motion.div
+                  key={src}
+                  className="relative -mx-2 w-[34%] max-w-[140px] transition-transform hover:z-10 hover:-translate-y-2"
+                  initial={reduce ? false : { opacity: 0, y: 24, rotate: 0 }}
+                  animate={{ opacity: 1, y: [0, 10, 0][i], rotate: [-6, 3, -2][i] }}
+                  transition={{ delay: reduce ? 0 : 0.9 + i * 0.12, type: "spring", stiffness: 220, damping: 18 }}
+                >
+                  <Polaroid src={src} alt={`${study.title}, photo ${i + 1}`} tape={["#ffc700", "#18a0fb", "#ee46d3"][i]} ratio="1 / 1" sizes="140px" />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         <motion.div
-          className="flex flex-col px-7 pb-8 pt-8 sm:px-10"
+          className="flex min-h-0 flex-col overflow-y-auto px-7 pb-5 pt-6 sm:px-10"
           initial={reduce ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.45 }}
@@ -76,9 +94,9 @@ export default function RecordWindow({ study, index, total, dir, firstOpen }: Pr
           <Block label="what we did" color={c}>
             {study.approach}
           </Block>
-          <div className="mt-6 rotate-[-1deg] bg-[#fff1b8] px-5 py-4 shadow-paper">
-            <p className="font-marker text-[26px] leading-none text-ink">result</p>
-            <p className="mt-1.5 font-note text-[17px] leading-snug text-ink">{study.result}</p>
+          <div className="mt-5 rotate-[-1deg] bg-[#fff1b8] px-5 py-3.5 shadow-paper">
+            <p className="font-marker text-[24px] leading-none text-ink">result</p>
+            <p className="mt-1.5 font-note text-[16px] leading-snug text-ink">{study.result}</p>
           </div>
 
           {study.links && study.links.length > 0 && (
@@ -91,14 +109,7 @@ export default function RecordWindow({ study, index, total, dir, firstOpen }: Pr
             </div>
           )}
 
-          {study.images.length > 0 && (
-            <div className="mt-6 flex gap-4">
-              {study.images.slice(0, 3).map((src, i) => (
-                <Polaroid key={src} src={src} alt={`${study.title}, photo ${i + 1}`} tilt={[-4, 3, -2][i]} tape={null} ratio="1 / 1" sizes="120px" className="w-[30%] max-w-[130px]" />
-              ))}
-            </div>
-          )}
-          <p className="mt-6 font-note text-[14px] text-ink-faint">
+          <p className="mt-auto pt-4 font-note text-[14px] text-ink-faint">
             record {index + 1} of {total}
           </p>
         </motion.div>
@@ -109,12 +120,12 @@ export default function RecordWindow({ study, index, total, dir, firstOpen }: Pr
 
 function Block({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
   return (
-    <div className="mt-6">
-      <p className="relative inline-block font-marker text-[28px] leading-none text-ink">
+    <div className="mt-5">
+      <p className="relative inline-block font-marker text-[27px] leading-none text-ink">
         {label}
         <span aria-hidden className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full" style={{ background: color, transform: "rotate(-1deg)" }} />
       </p>
-      <p className="mt-2 max-w-[56ch] text-[16px] leading-relaxed text-ink-soft">{children}</p>
+      <p className="mt-2 max-w-[56ch] text-[15px] leading-[1.6] text-ink-soft">{children}</p>
     </div>
   );
 }
