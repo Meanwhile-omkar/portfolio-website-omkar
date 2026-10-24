@@ -63,6 +63,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "Cut weak SKUs using the data, ran campaigns per sales channel, and moved inventory toward high-margin categories.",
     result: "Runner-up. Projected: 18% better margins and 25% less dead stock.",
     images: ["/photos/wins/ies-case-win.jpg"],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/1J_sdxmgLxNNlMn6-Q2RsxqcEUtGUiXsR/view?usp=sharing" }],
     sleeve: { color: "#ffc700", icon: "cart" },
   },
   {
@@ -78,6 +79,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "Place drivers using demand heatmaps, redesign shifts around peak hours, and add incentives to fill the gaps.",
     result: "Top 10 out of 340+ participants.",
     images: [],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/19V3r3Fv1Uq4AwOe6QrE5zpRE7wHh5tET/view?usp=sharing" }],
     sleeve: { color: "#ef5533", icon: "pin" },
   },
   {
@@ -93,6 +95,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "Bottom-up: rides per day per city × average fare × Uber's cut × number of cities, adjusted for regional prices, plus Uber Eats and Freight.",
     result: "Top 10 out of 600+. It was my first guesstimate.",
     images: [],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/1rPx2cBVmNCvhuJ7GqwSVl-VaqUSG3aL-/view?usp=sharing" }],
     sleeve: { color: "#00b5ce", icon: "calculator" },
   },
   {
@@ -151,6 +154,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "A ₹75 lakh Universal Design plan: accessible offices, mentorship, and programmes to make people part of the team.",
     result: "Recognised. Projected: 60% lower attrition and clear promotion paths.",
     images: [],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/11RN_tkOjuUjoC7KjpZs9kTml-Y0DyivI/view?usp=sharing" }],
     sleeve: { color: "#1bc47d", icon: "steps" },
   },
 ];

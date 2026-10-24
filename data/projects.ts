@@ -36,6 +36,7 @@ export const projects: Project[] = [
     stack: ["FastAPI", "React", "scikit-learn", "OpenRouter", "Render", "Vercel"],
     links: [
       { label: "open the app", href: "https://lawzy-legal-assistant.vercel.app/" },
+      { label: "watch the demo", href: "https://drive.google.com/file/d/1wBfjaJ7w4lHDGg2wBT9OlUEcyPpa0MuV/view?usp=sharing" },
       { label: "code", href: `${GH}/AI-legal-Assistant` },
     ],
     image: null,
@@ -175,7 +176,7 @@ export const projects: Project[] = [
     ],
     result: "94% accuracy. Won the hackathon, and the organising college used it as a screening tool.",
     stack: ["Python", "scikit-learn", "NLP"],
-    links: [],
+    links: [{ label: "code", href: `${GH}/ML-Quest---Fake-Job-Check` }],
     image: null,
     spine: { color: "#ffc700", icon: "magnifier", width: 96, height: 306 },
   },
