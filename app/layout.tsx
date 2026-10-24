@@ -4,10 +4,32 @@ import { fontVars } from "./fonts";
 import { profile } from "@/data/profile";
 import CanvasGlow from "@/components/canvas/CanvasGlow";
 import SmoothScroll from "@/components/canvas/SmoothScroll";
+import { SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
+const TITLE = `${profile.name} · Data Science & Strategy`;
+
+// Search and link-preview metadata only; none of this is rendered on the page.
 export const metadata: Metadata = {
-  title: `${profile.name} · Data Science & Strategy`,
-  description: profile.line,
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: profile.name,
+  authors: [{ name: profile.name, url: SITE_URL }],
+  creator: profile.name,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  openGraph: {
+    type: "profile",
+    url: "/",
+    siteName: profile.name,
+    title: TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "en_IN",
+    firstName: profile.first,
+    lastName: profile.name.split(" ").slice(1).join(" "),
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: SITE_DESCRIPTION },
+  formatDetection: { telephone: false, address: false, email: false },
 };
 
 // Design direction contract (impeccable). Kept in the built HTML so the finish review can audit it.

@@ -8,10 +8,12 @@ import Hobbies from "@/components/sections/Hobbies";
 import Nav from "@/components/sections/Nav";
 import Toolbox from "@/components/sections/Toolbox";
 import Wins from "@/components/sections/Wins";
+import StructuredData from "@/components/seo/StructuredData";
 
 export default function Home() {
   return (
     <>
+      <StructuredData />
       <Nav />
       <main className="relative">
         <Hero />
