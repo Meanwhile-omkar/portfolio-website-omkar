@@ -1,22 +1,10 @@
-import { Polaroid, StickyNote } from "@/components/sketch/Paper";
+import { StickyNote } from "@/components/sketch/Paper";
+import PhotoStrip from "@/components/ui/PhotoStrip";
 import SectionTitle from "@/components/ui/SectionTitle";
-import Marquee from "@/components/ui/Marquee";
-import { campusPhotos, roles } from "@/data/campus";
-
-const TAPES = ["#ee46d3", "#18a0fb", "#ffc700", "#1bc47d"];
-const MIN_TILES = 8;
+import { roles } from "@/data/campus";
+import { campusPhotos } from "@/data/gallery";
 
 export default function Campus() {
-  // Until more photos arrive, empty taped frames keep the strip full.
-  const tiles = [
-    ...campusPhotos,
-    ...Array.from({ length: Math.max(0, MIN_TILES - campusPhotos.length) }, (_, i) => ({
-      src: "",
-      alt: "more photos coming",
-      caption: i % 2 ? "Trinity" : "S4DS",
-    })),
-  ];
-
   return (
     <section id="campus" aria-labelledby="campus-title" className="relative scroll-mt-20 overflow-hidden py-28 md:py-36">
       <div className="mx-auto max-w-[1200px] px-5">
@@ -36,21 +24,9 @@ export default function Campus() {
         </div>
       </div>
 
-      <Marquee duration={Math.max(40, tiles.length * 7)} reverse className="mt-14" label="Photos from Trinity and S4DS">
-        {tiles.map((p, i) => (
-          <div key={i} className="mx-4 shrink-0 py-5" style={{ width: i % 3 === 1 ? 280 : 220 }}>
-            <Polaroid
-              src={p.src || undefined}
-              alt={p.alt}
-              caption={p.caption}
-              tilt={[-3, 2, -1.5, 3][i % 4]}
-              tape={TAPES[i % TAPES.length]}
-              ratio={i % 3 === 1 ? "4 / 3" : "4 / 5"}
-              sizes="280px"
-            />
-          </div>
-        ))}
-      </Marquee>
+      <div className="mt-14">
+        <PhotoStrip photos={campusPhotos} rows={2} height={230} alt="College life, fests and visits" seed={11} reverseFirst />
+      </div>
     </section>
   );
 }

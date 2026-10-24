@@ -106,6 +106,7 @@
     display: flex;
     width: max-content;
     animation: marquee var(--marquee-dur, 70s) linear infinite;
+    will-change: transform;
   }
   .marquee-track[data-reverse="true"] {
     animation-direction: reverse;
@@ -113,6 +114,26 @@
   .bob {
     animation: bob var(--bob-dur, 6s) ease-in-out infinite;
     animation-delay: var(--bob-delay, 0s);
+  }
+}
+
+/* Photo strips: row height per strip, shorter on phones. Photos keep their own width. */
+.photo-strip {
+  --row-h: var(--row-h-d);
+}
+@media (max-width: 640px) {
+  .photo-strip {
+    --row-h: var(--row-h-m);
+  }
+}
+
+/* Hobby board columns: given width on desktop, 70% on phones. */
+.hobby-col {
+  width: calc(var(--w) + 40px);
+}
+@media (max-width: 640px) {
+  .hobby-col {
+    width: calc(var(--w) * 0.7 + 40px);
   }
 }
 

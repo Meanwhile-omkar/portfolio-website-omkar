@@ -6,7 +6,7 @@ import { achievements, podiumTotal, recognitions } from "@/data/achievements";
 import { caseStudies } from "@/data/caseStudies";
 import { winsPhotos } from "@/data/gallery";
 import type { Shape } from "@/lib/rough";
-import PhotoWall from "./PhotoWall";
+import PhotoStrip from "@/components/ui/PhotoStrip";
 
 // Every number here is counted from the data files, so it stays true when they change.
 const podiums = Math.max(podiumTotal, achievements.length);
@@ -79,7 +79,9 @@ export default function Wins() {
         </div>
       </div>
 
-      <PhotoWall photos={winsPhotos} />
+      <div className="mt-20">
+        <PhotoStrip photos={winsPhotos} rows={2} height={250} alt="Competitions, hackathons and conferences" />
+      </div>
     </section>
   );
 }

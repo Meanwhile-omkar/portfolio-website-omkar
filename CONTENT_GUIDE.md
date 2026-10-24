@@ -11,7 +11,7 @@ All text and numbers live in `data/`. You never need to touch the components to 
 | Case competitions (records) | `data/caseStudies.ts` |
 | Awards | `data/achievements.ts` |
 | Toolbox stickers | `data/skills.ts` |
-| Photo strips (wins, hobbies) | `data/gallery.ts` |
+| Photo strips (wins, campus, hobbies) | `scripts/photo-sort.json`, then run `python scripts/photos.py` |
 
 ## Writing rules
 
@@ -35,3 +35,11 @@ See `ASSET_PROMPTS.md` for what to generate and where to put it.
 ## Fonts and primitives
 
 Open `/lab` while the dev server is running. It shows the hand-font options and every sketch element side by side.
+
+## Photos (wins, campus, hobbies)
+
+1. Put the photo in `assets-src/photos/` (any size, JPG or PNG).
+2. Add its file name to the right list in `scripts/photo-sort.json`. Order in the list is the order in the strip.
+3. Run `python scripts/photos.py`. It makes a small strip version and a large click-to-open version of every photo, skips near-duplicates, and updates `data/photos.json`.
+
+Photos show at their own shape, uncropped, with no captions.
