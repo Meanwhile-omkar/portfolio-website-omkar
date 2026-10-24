@@ -1,32 +1,37 @@
 import type { Config } from "tailwindcss";
 
-/** @type {import('tailwindcss').Config} */
-
+// Palette measured from onlines.com.ar (Apple-like neutrals + Figma accents).
 const config: Config = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
-        black: '#080808',
-        deep: '#0f0f0f',
-        surface: '#161616',
-        border: '#2a2a2a',
-        gold: '#C9A84C',
-        'gold-light': '#e8c96a',
-        'gold-dim': 'rgba(201,168,76,0.15)',
-        cream: '#F5EFE0',
-        'cream-dim': 'rgba(245,239,224,0.6)',
-        'tech-blue': '#4a9eff',
-        'strategy-amber': '#C9A84C',
+        paper: "#ffffff",
+        mist: "#f5f5f7",
+        ink: "#1d1d1f",
+        "ink-soft": "#424242",
+        "ink-faint": "#8a8a8e",
+        blue: { DEFAULT: "#0859d4", hover: "#1a59f9" },
+        yellow: "#ffc700",
+        sky: "#18a0fb",
+        pink: "#ee46d3",
+        green: "#1bc47d",
+        orange: "#ef5533",
+        violet: "#6465ed",
+        teal: "#00b5ce",
       },
       fontFamily: {
-        display: ['var(--font-playfair)', 'Georgia', 'serif'],
-        mono: ['var(--font-mono)', 'monospace'],
-        sans: ['var(--font-sans)', 'sans-serif'],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        marker: ["var(--font-marker)", "cursive"],
+        note: ["var(--font-note)", "cursive"],
+      },
+      boxShadow: {
+        lift: "0 18px 40px -18px rgba(29,29,31,0.35)",
+        paper: "0 1px 2px rgba(29,29,31,0.08), 0 8px 24px -12px rgba(29,29,31,0.18)",
       },
     },
   },

@@ -62,3 +62,6 @@ portfolio-reference.html
 # Planning/reference docs (optional - uncomment if you don't want to commit these)
 # REDESIGN_PLAN.md
 # CONTENT_GUIDE.md
+
+# Original art (sticker sheets, character PNGs). Large; the site ships the cut-down WebPs in public/.
+assets-src/
