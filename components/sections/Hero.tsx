@@ -2,7 +2,8 @@ import { siNextdotjs, siPandas, siPython, siReact, siScikitlearn } from "simple-
 import Character from "@/components/character/Character";
 import HandArrow from "@/components/sketch/HandArrow";
 import { StickyNote, Sticker } from "@/components/sketch/Paper";
-import { helloMailto, profile, resumeMailto } from "@/data/profile";
+import { LinkedInDoodle, MailDoodle } from "@/components/sketch/ContactIcons";
+import { helloMailto, profile } from "@/data/profile";
 
 export default function Hero() {
   return (
@@ -21,16 +22,14 @@ export default function Hero() {
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <a href={helloMailto} className="btn-blue">
+              <MailDoodle />
               Email me
             </a>
             <a href={profile.contact.linkedin} target="_blank" rel="noreferrer" className="btn-ghost">
+              <LinkedInDoodle />
               LinkedIn
             </a>
-            <a href={resumeMailto} className="btn-ghost">
-              Get my résumé
-            </a>
           </div>
-          <p className="mt-3 max-w-[40ch] font-note text-[15px] text-ink-faint">The résumé button writes me an email. I reply with the PDF.</p>
         </div>
 
         {/* Character with its annotations */}
@@ -51,15 +50,6 @@ export default function Hero() {
             DJ Sanghvi, Mumbai
           </StickyNote>
         </div>
-      </div>
-
-      <div className="mx-auto mt-12 max-w-[1200px] px-5 md:mt-4">
-        <p className="max-w-[60ch] font-note text-[17px] text-ink-soft">
-          Inside: a club you can walk into, a library of things I built, and the trophies.{" "}
-          <a href="#experience" className="text-ink underline decoration-wavy decoration-blue underline-offset-4">
-            start at the door
-          </a>
-        </p>
       </div>
     </section>
   );

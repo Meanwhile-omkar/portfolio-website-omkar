@@ -1,6 +1,7 @@
 import Character from "@/components/character/Character";
 import Sketch from "@/components/sketch/Sketch";
 import { helloMailto, profile, resumeMailto } from "@/data/profile";
+import { LinkedInDoodle, MailDoodle } from "@/components/sketch/ContactIcons";
 import CopyEmail from "./CopyEmail";
 
 export default function Contact() {
@@ -17,9 +18,11 @@ export default function Contact() {
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <a href={helloMailto} className="btn-blue">
+              <MailDoodle />
               Email me
             </a>
             <a href={profile.contact.linkedin} target="_blank" rel="noreferrer" className="btn-ghost">
+              <LinkedInDoodle />
               LinkedIn
             </a>
             <a href={profile.contact.github} target="_blank" rel="noreferrer" className="btn-ghost">
@@ -29,7 +32,8 @@ export default function Contact() {
               Get my résumé
             </a>
           </div>
-          <div className="mt-6">
+          <p className="mt-3 max-w-[44ch] font-note text-[15px] text-ink-faint">The résumé button writes me an email. I reply with the PDF.</p>
+          <div className="mt-5">
             <CopyEmail email={profile.contact.email} />
           </div>
         </div>
