@@ -1,76 +1,25 @@
+export type Place = "Winner" | "Runner-up" | "2nd Runner-up";
+
+// From the résumé: 13 podium finishes across national hackathons and case competitions in total.
+// The list below is the ones written up so far.
+export const podiumTotal = 13;
+
+export const recognitions = ["Top 1,000 students worldwide on Unstop (Feb 2025)"];
+
 export interface Achievement {
-  trophy: string;
   title: string;
-  org: string;
-  year: string;
+  place: Place;
+  kind: "hackathon" | "case" | "data";
+  host: string;
+  year: number;
 }
 
 export const achievements: Achievement[] = [
-  {
-    trophy: '🥈',
-    title: '2nd Runner Up – KOPai Multimodal Study App',
-    org: 'GDG on Campus, IIIT Surat Hackathon',
-    year: '2026',
-  },
-  {
-    trophy: '🏆',
-    title: "Winner – Analytrix '26 Datathon",
-    org: 'Society for Data Science, Thakur College of Engineering, Mumbai',
-    year: '2026',
-  },
-  {
-    trophy: '🏆',
-    title: 'Winner – Spotify Case Study Competition',
-    org: 'Datazen, KJ Somaiya College of Engineering, Mumbai',
-    year: '2026',
-  },
-  {
-    trophy: '🥈',
-    title: 'Runner Up – Consulting Case Competition, IES Business School, Mumbai.',
-    org: 'IES Business School, Mumbai',
-    year: '2025',
-  },
-  {
-    trophy: '🏆',
-    title: 'Winner– Best Data Storytelling Pitch',
-    org: 'Avenir Analytics Club, IES Business School, Mumbai',
-    year: '2025',
-  },
-  {
-    trophy: '🥈',
-    title: 'Second Runner Up– VizAthon: Power BI Visualization Challenge.',
-    org: 'Ei8 Office, Mumbai',
-    year: '2025',
-  },
-  {
-    trophy: '🏆',
-    title: 'Winner – ML Quest Hackathon',
-    org: 'G. H. Raisoni College of Engineering, Nagpur',
-    year: '2024',
-  },
-];
-
-export interface Leadership {
-  icon: string;
-  role: string;
-  org: string;
-  duration: string;
-  description: string;
-}
-
-export const leadership: Leadership[] = [
-  {
-    icon: '👑',
-    role: 'Vice Chairperson',
-    org: 'Trinity – Interdisciplinary Student Committee',
-    duration: 'July 2025 – Present',
-    description: 'Leading strategy, operations, and cross-functional coordination for college-wide events.',
-  },
-  {
-    icon: '📢',
-    role: 'Head of Marketing',
-    org: 'DJS S4DS – Society for Data Science',
-    duration: 'August 2025 – Present',
-    description: 'Engaging with tech firms, startups, and business leaders to secure strategic collaborations.',
-  },
+  { title: "KOPai study app", place: "2nd Runner-up", kind: "hackathon", host: "GDG on Campus, IIIT Surat", year: 2026 },
+  { title: "Analytrix '26 Datathon", place: "Winner", kind: "data", host: "Thakur College of Engineering, Mumbai", year: 2026 },
+  { title: "Spotify case study", place: "Winner", kind: "case", host: "Datazen, KJ Somaiya College, Mumbai", year: 2026 },
+  { title: "Consulting case competition", place: "Runner-up", kind: "case", host: "IES Business School, Mumbai", year: 2025 },
+  { title: "Best data storytelling pitch", place: "Winner", kind: "data", host: "Avenir Analytics Club, IES Business School", year: 2025 },
+  { title: "VizAthon, Power BI challenge", place: "2nd Runner-up", kind: "data", host: "Ei8 Office, Mumbai", year: 2025 },
+  { title: "ML Quest hackathon", place: "Winner", kind: "hackathon", host: "G. H. Raisoni College of Engineering, Nagpur", year: 2024 },
 ];

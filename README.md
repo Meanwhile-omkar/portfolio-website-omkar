@@ -1,108 +1,45 @@
-# Omkar Haryan — Portfolio Website
+# Omkar Haryan · portfolio
 
-**The Knight's Gambit** — A chess-themed portfolio showcasing the intersection of Data Science and Strategic Consulting.
+A portfolio drawn like a sketchbook:
+- **The Experience Club:** knock on the door, then walk through each internship.
+- **The Library:** books for projects, vinyl records for case competitions.
+- Simple, hand-drawn sections for everything else.
 
-## 🎯 Features
+## Run it
 
-- **Minimal Hero Page** - Clean introduction with dual domains (Tech + Strategy)
-- **Floating Bottom Navbar** - Icon-based navigation with smooth scroll
-- **Case Studies** - Accordion-style expandable cards with competition details
-- **Projects & Hackathons** - Modal-based detailed project views
-- **Achievements** - Dedicated winnings and leadership section
-- **Gallery** - Horizontal scroll film-roll style photo gallery (placeholder for images)
-- **Chess Theme** - Knight metaphor with gold accents and elegant typography
-
-## 🛠 Tech Stack
-
-- **Framework**: Next.js 15+ with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Animations**: CSS animations + Framer Motion (if needed)
-- **Fonts**: Playfair Display (serif), DM Mono, DM Sans
-
-## 🚀 Getting Started
-
-Install dependencies:
 ```bash
 npm install
-```
-
-Run development server:
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 📁 Project Structure
-
-```
-portfolio-nextjs/
-├── app/
-│   ├── layout.tsx          # Root layout with fonts
-│   ├── page.tsx            # Main page assembling all sections
-│   └── globals.css         # Global styles and chess theme
-├── components/
-│   ├── sections/
-│   │   ├── Hero.tsx        # Hero section
-│   │   ├── About.tsx       # Philosophy and stats
-│   │   ├── Worlds.tsx      # Tech vs Strategy domains
-│   │   ├── CaseStudies.tsx # Accordion case competitions
-│   │   ├── Projects.tsx    # Modal-based projects
-│   │   ├── Winnings.tsx    # Achievements and leadership
-│   │   ├── Gallery.tsx     # Photo gallery (horizontal scroll)
-│   │   └── Contact.tsx     # Contact section
-│   └── ui/
-│       └── BottomNav.tsx   # Floating bottom navigation
-└── public/                 # Static assets (add your images here)
-```
-
-## 🖼️ Adding Gallery Photos
-
-1. Add your images to the `public/gallery/` directory
-2. Update the `galleryPhotos` array in `components/sections/Gallery.tsx`
-3. Replace placeholder divs with `<Image>` components from Next.js
-
-Example:
-```tsx
-import Image from 'next/image';
-
-// In the gallery map:
-<Image
-  src="/gallery/your-photo.jpg"
-  alt={photo.caption}
-  fill
-  className="object-cover"
-/>
-```
-
-## 🎨 Customization
-
-### Colors (tailwind.config.ts)
-- Gold: `#C9A84C`
-- Tech Blue: `#4a9eff`
-- Background: `#080808`
-- Surface: `#161616`
-
-### Content
-Update the data arrays in each section component:
-- `components/sections/CaseStudies.tsx` - `cases` array
-- `components/sections/Projects.tsx` - `projects` array
-- `components/sections/Winnings.tsx` - `achievements` array
-
-## 📝 Build for Production
-
-```bash
+npm run dev        # http://localhost:3000
 npm run build
-npm start
 ```
 
-## 📧 Contact
+## Stack
 
-- **Email**: omkar.djsce27@gmail.com
-- **LinkedIn**: [omkar-haryan](https://www.linkedin.com/in/omkar-haryan)
-- **GitHub**: [Meanwhile-omkar](https://github.com/Meanwhile-omkar)
+| Package | Used for |
+|---|---|
+| Next.js 16, React 19, TypeScript, Tailwind 3 | the site itself |
+| framer-motion | animation |
+| lenis | smooth scroll |
+| roughjs | hand-drawn shapes and hatching |
+| rough-notation | marker circles and highlights |
+| perfect-freehand | marker arrows |
+| simple-icons | tool logos |
 
----
+## Where things are
 
-*"The knight doesn't move like anyone else."* ♞
+- `data/`: all content. See `CONTENT_GUIDE.md`.
+- `components/sketch/`: the drawing kit (rough shapes, doodles, arrows, tape, polaroids, stickers).
+- `components/experience/`: the door, the full-screen club, scenes and notes.
+- `components/library/`: the shelf, books, records and the windows they open into.
+- `components/sections/`: hero, about, wins, toolbox, education, hobbies, contact.
+- `ASSET_PROMPTS.md`: the images to generate (character, backgrounds) and where they go.
+- `PRODUCT.md`: who the site is for and the rules for its copy.
+- `/lab`: font and drawing-kit specimen page (not indexed).
+
+## Visual checks
+
+```bash
+node scripts/shot.mjs http://localhost:3000/ out.png 1440 900 --full
+node scripts/flow-club.mjs http://localhost:3000 <outDir> 1440 900
+node scripts/flow-library.mjs http://localhost:3000 <outDir>
+```
