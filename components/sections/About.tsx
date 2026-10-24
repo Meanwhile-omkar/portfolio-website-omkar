@@ -1,4 +1,3 @@
-import Annotate from "@/components/sketch/Annotate";
 import Doodle from "@/components/sketch/Doodle";
 import { Polaroid } from "@/components/sketch/Paper";
 import Sketch from "@/components/sketch/Sketch";
@@ -45,11 +44,20 @@ export default function About() {
               {education.city} · {education.years}
             </p>
             <p className="mt-7 font-note text-[22px] text-ink">
-              CGPA{" "}
-              <Annotate type="circle" color="#ef5533" padding={[12, 20]} strokeWidth={3} delay={300}>
-                <span className="font-marker text-[52px] leading-none">{education.cgpa}</span>
-              </Annotate>
-              <span className="ml-3 text-ink-faint">/ 10</span>
+              CGPA
+              {/* drawn ring sized to the number itself, so it can't drift when fonts load */}
+              <span className="relative mx-4 inline-block px-5 py-3 align-middle">
+                <Sketch
+                  w={140}
+                  h={80}
+                  stretch
+                  seed={12}
+                  className="pointer-events-none absolute inset-0 h-full w-full"
+                  shapes={[{ t: "ellipse", cx: 70, cy: 40, w: 136, h: 74, o: { stroke: "#ef5533", strokeWidth: 3, roughness: 1.4 } }]}
+                />
+                <span className="relative font-marker text-[52px] leading-none">{education.cgpa}</span>
+              </span>
+              <span className="text-ink-faint">/ 10</span>
             </p>
           </div>
 
