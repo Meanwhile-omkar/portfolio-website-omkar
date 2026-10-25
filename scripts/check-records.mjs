@@ -12,7 +12,7 @@ for (const [w, h] of sizes) {
   await first.click();
   await p.waitForTimeout(2000);
   const bad = [];
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 10; i++) {
     const r = await p.evaluate(() => {
       const card = document.querySelector('[role="dialog"] .grid');
       const cols = [...card.children];

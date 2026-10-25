@@ -26,9 +26,9 @@ const sleeveTilts = caseStudies.map(() => Math.round((rnd() * 2 - 1) * 4));
 // Records are grouped by how the competition went, one shelf per group.
 const indexed = caseStudies.map((s, i) => ({ s, i }));
 const recordShelves = [
-  { label: "won it", items: indexed.filter(({ s }) => s.badge === "Winner" || s.badge === "Runner-up"), x: 0, y: 920, w: 600, tilt: -0.6, flip: false, hanging: false },
-  { label: "top finishes", items: indexed.filter(({ s }) => s.badge === "Top 5" || s.badge === "Top 10"), x: 600, y: 1100, w: 600, tilt: 0.7, flip: true, hanging: false },
-  { label: "made the finals", items: indexed.filter(({ s }) => s.badge === "Finalist" || s.badge === "Recognised"), x: 40, y: 1450, w: 620, tilt: -1, flip: false, hanging: true },
+  { label: "won it", items: indexed.filter(({ s }) => s.badge === "Winner" || s.badge === "Runner-up"), x: 20, y: 920, w: 830, tilt: -0.6, flip: false, hanging: false },
+  { label: "top finishes", items: indexed.filter(({ s }) => s.badge === "Top 5" || s.badge === "Top 10"), x: 0, y: 1300, w: 590, tilt: 0.7, flip: false, hanging: false },
+  { label: "made the finals", items: indexed.filter(({ s }) => s.badge === "Finalist" || s.badge === "Recognised"), x: 610, y: 1360, w: 590, tilt: -1, flip: true, hanging: true },
 ];
 
 type Open = { kind: "book" | "record"; index: number; dir: number; first: boolean } | null;
@@ -80,7 +80,7 @@ export default function Library() {
       </div>
 
       <div className="mx-auto mt-14 max-w-[1200px] px-3 sm:px-5">
-        <ScaleStage width={W} height={1800}>
+        <ScaleStage width={W} height={1720}>
           {/* ── Shelf 1: the strongest six ── */}
           <div className="absolute inset-x-0 top-0 h-[400px]">
             <div className="absolute bottom-[26px] left-[40px] flex items-end gap-[14px]">
@@ -178,9 +178,9 @@ export default function Library() {
               <ShelfLabel className="left-[70px]">{shelf.label}</ShelfLabel>
             </div>
           ))}
-          <Doodle name="music" color="#18a0fb" size={84} seed={6} className="absolute left-[760px] top-[960px] rotate-[8deg]" />
-          <Doodle name="headset" color="#ee46d3" size={110} seed={4} className="absolute left-[800px] top-[1560px] rotate-[-10deg]" />
-          <Doodle name="sparkle" color="#ffc700" size={56} seed={8} className="absolute left-[960px] top-[1520px]" />
+          <Doodle name="headset" color="#ee46d3" size={120} seed={4} className="absolute left-[930px] top-[1030px] rotate-[-10deg]" />
+          <Doodle name="music" color="#18a0fb" size={84} seed={6} className="absolute left-[1080px] top-[960px] rotate-[8deg]" />
+          <Doodle name="sparkle" color="#ffc700" size={56} seed={8} className="absolute left-[1110px] top-[1110px]" />
         </ScaleStage>
       </div>
 

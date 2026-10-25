@@ -52,6 +52,21 @@ export const caseStudies: CaseStudy[] = [
     sleeve: { color: "#18a0fb", icon: "people" },
   },
   {
+    id: "unhinged",
+    title: "Axiom Circular",
+    event: "Unhinged",
+    host: "E-Cell, DJ Sanghvi College of Engineering",
+    date: "Feb 2026",
+    badge: "Winner",
+    teaser: "Topic given on the spot: a best-out-of-waste startup. We pitched a 15-minute health check that keeps old EV batteries from being scrapped.",
+    problem: "Topic on the spot: a \"best out of waste\" startup, built in a few hours. We picked old EV batteries. They still hold value, but testing one takes 6 to 24 hours, so most get scrapped.",
+    approach: "A handheld scanner that reads battery health in under 15 minutes, plus a tamper-proof digital passport buyers can trust. It earns from scanner leasing, a platform subscription and a small marketplace fee.",
+    result: "Won first place.",
+    images: [],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/1hz_N14fMHoIWQPjyczCiuhPUugxNBvG-/view?usp=sharing" }],
+    sleeve: { color: "#ee46d3", icon: "battery" },
+  },
+  {
     id: "ies-retail",
     title: "Retail margins",
     event: "Consulting Case Competition",
@@ -79,7 +94,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "Place drivers using demand heatmaps, redesign shifts around peak hours, and add incentives to fill the gaps.",
     result: "Top 10 out of 340+ participants.",
     images: [],
-    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/19V3r3Fv1Uq4AwOe6QrE5zpRE7wHh5tET/view?usp=sharing" }],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/19V3r3Fv1Uq4AwOe6QrE5zpRE7wHh5tET/view?usp=sharing" }, { label: "final round deck", href: "https://drive.google.com/file/d/1OP2NtsRWJtTaycvhz3Y3p4pWS2aa-hpr/view?usp=sharing" }],
     sleeve: { color: "#ef5533", icon: "pin" },
   },
   {
@@ -110,6 +125,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "Studied competitors and where VC money was going. Space defence payloads were attracting big funding, so we proposed using the passenger spaceships for defence payloads in the near term, while passenger flights continue in parallel.",
     result: "Finalist. Two tracks: stable cash flow now, the passenger brand kept for later.",
     images: [],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/14HMS4R01XMeMiJO99qn9GbCOdsaP3vDL/view?usp=sharing" }, { label: "financial analysis", href: "https://drive.google.com/file/d/1j5QJCkrrbeJQZI4d64Kh8YXWNy7L4kqX/view?usp=sharing" }],
     sleeve: { color: "#6465ed", icon: "rocket" },
   },
   {
@@ -124,6 +140,7 @@ export const caseStudies: CaseStudy[] = [
     approach: "Looked at loneliness among the elderly, compared existing options (family apps, health monitors), found a gap, and planned experiments in community, companionship and safety, launched in phases through NRI communities.",
     result: "Finalist, with a go-to-market roadmap and the first feature bets.",
     images: [],
+    links: [{ label: "see the deck", href: "https://drive.google.com/file/d/1LhvbpMABfOOFwXwLPAyyAgya1X0nmGcS/view?usp=sharing" }],
     sleeve: { color: "#ee46d3", icon: "plane" },
   },
   {

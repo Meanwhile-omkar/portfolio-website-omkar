@@ -101,8 +101,8 @@ export default function RecordWindow({ study, index, total, dir, firstOpen }: Pr
 
           {study.links && study.links.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2.5">
-              {study.links.map((l) => (
-                <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className="btn-blue !py-1.5 !text-[14px]">
+              {study.links.map((l, i) => (
+                <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className={`${i === 0 ? "btn-blue" : "btn-ghost"} !py-1.5 !text-[14px]`}>
                   {l.label}
                 </a>
               ))}
