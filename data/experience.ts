@@ -21,6 +21,8 @@ export interface Experience {
   logo: string | null;
   /** Background behind the logo, for logos drawn in white. */
   logoBg?: string;
+  /** Certificates, letters of recommendation: shown as small buttons under the website link. */
+  docs?: { label: string; href: string }[];
   /** Square logos get a square card instead of the wide wordmark card. */
   logoSquare?: boolean;
   background: string | null;
@@ -37,6 +39,7 @@ export const experience: Experience[] = [
     id: "infiheal",
     company: "Infiheal",
     website: "https://infiheal.com/",
+    docs: [{ label: "completion certificate", href: "https://drive.google.com/file/d/1dIBo83a7E2o7-or9tKPwC7QCuHzjH-gV/view?usp=sharing" }],
     role: "Founder's Office Intern",
     dates: "Mar – Jul 2026",
     location: "Mumbai",
@@ -85,6 +88,10 @@ export const experience: Experience[] = [
     id: "bigul",
     company: "Bigul",
     website: "https://bigul.co/",
+    docs: [
+      { label: "completion certificate", href: "https://drive.google.com/file/d/1Qlx7iBgHN89CisfURMxbbgdhO7rHb39q/view?usp=sharing" },
+      { label: "recommendation letter", href: "https://drive.google.com/file/d/13Nz224Ec9YNAnYNATJrVHnT0HjTQQQp7/view?usp=sharing" },
+    ],
     role: "Product Manager Intern",
     dates: "Nov – Dec 2025",
     location: "Mumbai",

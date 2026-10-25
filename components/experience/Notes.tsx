@@ -53,6 +53,24 @@ export default function Notes({ exp, index, total }: { exp: Experience; index: n
             {exp.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
           </a>
         )}
+        {exp.docs && (
+          <div data-zone className="mt-3 flex flex-wrap gap-2">
+            {exp.docs.map((d) => (
+              <a
+                key={d.href}
+                href={d.href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink/80 bg-white px-3 py-1 font-note text-[15px] text-ink transition-transform hover:-translate-y-0.5"
+              >
+                <svg viewBox="0 0 12 14" className="h-3.5 w-3" aria-hidden>
+                  <path d="M1 1h7l3 3v9H1z M8 1v3h3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                </svg>
+                {d.label}
+              </a>
+            ))}
+          </div>
+        )}
       </motion.div>
 
       {/* ── left: what I did ── */}
