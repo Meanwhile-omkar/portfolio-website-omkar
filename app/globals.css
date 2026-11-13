@@ -93,6 +93,25 @@
   .label {
     @apply font-mono text-[12px] uppercase tracking-[0.08em] text-ink-faint;
   }
+
+  /* SSC papers page: Marathi mode swaps in Devanagari fonts (Inter and the hand fonts have no Devanagari). */
+  .ssc-deva,
+  .ssc-mr {
+    font-family: var(--font-deva), var(--font-inter), system-ui, sans-serif;
+  }
+  .ssc-mr .ssc-title,
+  .ssc-mr .font-note,
+  .ssc-mr .font-marker {
+    font-family: var(--font-deva-hand), var(--font-deva), cursive;
+  }
+  /* Kalam is much wider than the condensed marker font, so shrink it relative to its own size. */
+  .ssc-mr .font-marker {
+    zoom: 0.72;
+  }
+  .ssc-mr .label {
+    letter-spacing: 0;
+    font-family: var(--font-deva), system-ui, sans-serif;
+  }
 }
 
 @layer components {

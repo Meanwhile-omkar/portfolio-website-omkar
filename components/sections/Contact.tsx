@@ -3,6 +3,7 @@ import Sketch from "@/components/sketch/Sketch";
 import { helloMailto, profile, resumeMailto } from "@/data/profile";
 import { LinkedInDoodle, MailDoodle } from "@/components/sketch/ContactIcons";
 import CopyEmail from "./CopyEmail";
+import { givingBack } from "@/data/givingBack";
 
 export default function Contact() {
   return (
@@ -51,6 +52,14 @@ export default function Contact() {
       </div>
 
       <footer className="mx-auto mt-6 flex max-w-[1200px] flex-wrap items-center justify-between gap-3 border-t border-dashed border-ink/20 px-5 pt-6 text-[14px] text-ink-faint">
+        <nav aria-label="Giving back" className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1">
+          <span className="label">Giving back</span>
+          {givingBack.map((g) => (
+            <a key={g.href} href={g.href} title={g.note} className="text-ink-soft underline decoration-ink/25 underline-offset-4 hover:text-blue hover:decoration-blue">
+              {g.label}
+            </a>
+          ))}
+        </nav>
         <p>Drawn and built by {profile.name}, 2026.</p>
         <a href="#top" className="font-note text-[16px] text-ink-soft hover:text-ink">
           back to the top
