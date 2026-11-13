@@ -14,7 +14,6 @@ const MED_ORDER = Object.fromEntries(MEDIUMS.map((m, i) => [m.key, i]));
 const KIND_COLOR: Record<Kind | "all", string> = { all: "#ffffff", pyq: "#ffc700", prelim: "#18a0fb", qbank: "#1bc47d", model: "#ee46d3" };
 const STORE = "ssc-papers-prefs";
 
-const size = (kb: number) => (kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`);
 const bySubject = (a: Paper, b: Paper) =>
   (SUBJ_ORDER[a.subject] ?? 99) - (SUBJ_ORDER[b.subject] ?? 99) || (a.variant ?? "").localeCompare(b.variant ?? "") || a.title.localeCompare(b.title);
 
@@ -325,9 +324,9 @@ export default function SscLibrary({
                           <span className="font-mono text-[12px] font-normal text-ink-faint">{t.count(g.papers.length)}</span>
                         </h3>
                       )}
-                      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {g.papers.map((p) => (
-                          <Card key={p.path} p={p} lang={lang} />
+                      <ul className="grid grid-cols-2 gap-x-2.5 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
+                        {g.papers.map((p, i) => (
+                          <Card key={p.path} p={p} lang={lang} n={i + 1} />
                         ))}
                       </ul>
                     </div>
@@ -458,41 +457,36 @@ function Chip({ on, onClick, children, dot }: { on: boolean; onClick: () => void
   );
 }
 
-function Card({ p, lang }: { p: Paper; lang: Lang }) {
+function Card({ p, lang, n }: { p: Paper; lang: Lang; n: number }) {
   const t = T[lang];
   const s = SUBJ[p.subject];
   const sub = p.medium ? MEDIUMS.find((m) => m.key === p.medium)?.[lang] : p.variant ? variantLabel(p.variant, lang) : "";
-  const when =
-    p.kind === "pyq"
-      ? `${p.session === "supplementary" ? `${t.supplementary} · ` : ""}${examLabel(p.exam ?? "", lang)}`
-      : p.kind === "prelim"
-        ? p.title.split(" - ")[0]
-        : p.exam;
+  const when = p.kind === "pyq" ? `${p.session === "supplementary" ? "★ " : ""}${p.year}` : p.kind === "prelim" ? p.title.split(" - ")[0] : p.exam;
+  const href = fileHref(p);
   return (
-    <li>
-      <a
-        href={fileHref(p)}
-        target="_blank"
-        rel="noopener"
-        title={paperName(p)}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-ink/15 bg-white p-4 pl-5 transition-all hover:-translate-y-0.5 hover:border-ink hover:shadow-[4px_4px_0_#1d1d1f]"
+    <li className="relative flex flex-col rounded-xl border-2 border-ink/15 bg-white p-2.5 pt-3 transition-colors hover:border-ink">
+      <span
+        aria-hidden
+        className="absolute -left-1.5 -top-2 grid h-6 min-w-6 place-items-center rounded-md border-2 border-ink px-1 font-mono text-[12px] font-semibold text-ink"
+        style={{ background: s?.color ?? "#ffc700", color: "#fff", textShadow: "0 1px 0 rgba(0,0,0,.35)" }}
       >
-        <span aria-hidden className="absolute inset-y-0 left-0 w-1.5" style={{ background: s?.color ?? "#ffc700" }} />
-        <span className="text-[17px] font-semibold leading-snug text-ink">{s?.[lang] ?? p.subject}</span>
-        {sub && <span className="mt-0.5 text-[14px] text-ink-soft">{sub}</span>}
-        <span className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[12px] text-ink-faint">
-          {when && <span className={p.session === "supplementary" ? "text-orange" : ""}>{when}</span>}
-          {p.code && <span>· {p.code}</span>}
-          <span>
-            · {p.pages} {t.pages}
-          </span>
-          <span>· {size(p.sizeKB)}</span>
-        </span>
-        <span className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-mist px-3 py-1 text-[13px] font-medium text-blue transition-colors group-hover:bg-blue group-hover:text-white">
-          {t.open} ↗
-        </span>
-        <span className="sr-only">{paperName(p)}</span>
-      </a>
+        {n}
+      </span>
+      <span className="pl-4 text-[14px] font-semibold leading-tight text-ink md:text-[15px]" title={paperName(p)}>
+        {s?.[lang] ?? p.subject}
+      </span>
+      {sub && <span className="pl-4 text-[12px] leading-tight text-ink-soft">{sub}</span>}
+      <span className={`mt-1 pl-4 font-mono text-[11px] ${p.session === "supplementary" ? "text-orange" : "text-ink-faint"}`}>{when}</span>
+      <span className="mt-2 flex gap-1.5">
+        <a href={href} target="_blank" rel="noopener" className="flex-1 whitespace-nowrap rounded-lg bg-mist px-1 py-1.5 text-center text-[12px] font-semibold text-blue hover:bg-blue hover:text-white">
+          {t.view}
+        </a>
+        {!p.external && (
+          <a href={href} download className="flex-[1.5] whitespace-nowrap rounded-lg bg-ink px-1 py-1.5 text-center text-[12px] font-semibold text-white hover:bg-blue" aria-label={`${t.download}: ${paperName(p)}`}>
+            ⬇ {t.download}
+          </a>
+        )}
+      </span>
     </li>
   );
 }

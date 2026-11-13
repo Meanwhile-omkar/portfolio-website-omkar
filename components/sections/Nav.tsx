@@ -1,4 +1,3 @@
-import { helloMailto } from "@/data/profile";
 
 const links = [
   ["about", "#about"],
@@ -29,7 +28,7 @@ export default function Nav() {
             </li>
           ))}
         </ul>
-        <a href={helloMailto} className="btn-blue ml-1 !px-4 !py-2 !text-[14px]">
+        <a href="#contact" className="btn-blue ml-1 !px-4 !py-2 !text-[14px]">
           Let&apos;s talk
         </a>
       </nav>
