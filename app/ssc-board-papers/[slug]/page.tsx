@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SscLibrary from "@/components/ssc/SscLibrary";
-import { BrowseHub, JsonLd } from "@/components/ssc/Seo";
+import { BrowseHub, JsonLd, PaperIndex } from "@/components/ssc/Seo";
 import { BASE_PATH, LANDINGS, SSC_SITE_NAME, landingBySlug, papersInScope } from "@/components/ssc/data";
 import { profile } from "@/data/profile";
 
@@ -52,6 +52,7 @@ export default async function LandingPage({ params }: Props) {
         heading={{ kicker: { en: "Maharashtra SSC · Class 10", mr: "महाराष्ट्र एसएससी · इयत्ता १०वी" }, h1: l.h1, intro: l.intro }}
       />
       <BrowseHub current={l.slug} />
+      <PaperIndex papers={papers} />
     </main>
   );
 }

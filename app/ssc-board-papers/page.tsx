@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SscLibrary from "@/components/ssc/SscLibrary";
-import { BrowseHub, Faq, JsonLd } from "@/components/ssc/Seo";
+import { BrowseHub, Faq, JsonLd, PaperIndex } from "@/components/ssc/Seo";
 import { ALL, BASE_PATH, SSC_SITE_NAME } from "@/components/ssc/data";
 import { profile } from "@/data/profile";
 
@@ -54,6 +54,7 @@ export default function SscBoardPapersPage() {
       <SscLibrary email={profile.contact.email} />
       <BrowseHub />
       <Faq />
+      <PaperIndex papers={ORDERED} />
     </main>
   );
 }

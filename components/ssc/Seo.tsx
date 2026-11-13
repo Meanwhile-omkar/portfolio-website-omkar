@@ -1,7 +1,7 @@
 // Server-rendered SEO pieces for the SSC papers pages: JSON-LD, the "browse by" link hub and the FAQ.
 import { SITE_URL } from "@/lib/site";
 import { profile } from "@/data/profile";
-import { BASE_PATH, LANDINGS, SSC_SITE_NAME, fileAbs, paperName, type Paper } from "./data";
+import { BASE_PATH, LANDINGS, SSC_SITE_NAME, fileAbs, fileHref, paperName, type Paper } from "./data";
 
 export const FAQ: { q: string; a: string; qm: string; am: string }[] = [
   {
@@ -177,6 +177,41 @@ export function Faq() {
           </details>
         ))}
       </div>
+    </section>
+  );
+}
+
+// Plain, always-rendered list of every paper link, grouped by year/type. Keeps all PDFs crawlable
+// even though the interactive library shows them inside folders.
+export function PaperIndex({ papers }: { papers: Paper[] }) {
+  const groups = new Map<string, Paper[]>();
+  for (const p of papers) {
+    const k = p.kind === "pyq" ? `SSC board papers ${p.year}${p.session === "supplementary" ? " (supplementary)" : ""}` : p.kind === "prelim" ? "Prelim & practice papers" : p.kind === "qbank" ? "Question banks" : "Model papers";
+    groups.set(k, [...(groups.get(k) ?? []), p]);
+  }
+  return (
+    <section aria-labelledby="index-h" className="mx-auto max-w-6xl px-4 pb-16">
+      <details className="rounded-2xl border-2 border-dashed border-ink/20 p-4 md:p-5">
+        <summary id="index-h" className="cursor-pointer text-[16px] font-semibold text-ink">
+          Full list of papers <span className="ssc-deva font-medium text-ink-soft">· सर्व प्रश्नपत्रिकांची यादी</span>
+        </summary>
+        <div className="mt-4 grid gap-5 md:grid-cols-2">
+          {[...groups.entries()].map(([g, ps]) => (
+            <div key={g}>
+              <h3 className="text-[14px] font-semibold text-ink">{g}</h3>
+              <ul className="mt-1 grid gap-0.5">
+                {ps.map((p) => (
+                  <li key={p.path}>
+                    <a href={fileHref(p)} className="text-[13px] text-blue underline-offset-2 hover:underline">
+                      {paperName(p).replace("Maharashtra SSC ", "")}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </details>
     </section>
   );
 }
