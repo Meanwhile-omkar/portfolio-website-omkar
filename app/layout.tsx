@@ -4,6 +4,7 @@ import { fontVars } from "./fonts";
 import { profile } from "@/data/profile";
 import CanvasGlow from "@/components/canvas/CanvasGlow";
 import SmoothScroll from "@/components/canvas/SmoothScroll";
+import { Analytics } from "@vercel/analytics/next";
 import { SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
 const TITLE = `${profile.name} · Data Science & Strategy`;
@@ -53,6 +54,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div hidden dangerouslySetInnerHTML={{ __html: `<!--${CONTRACT}-->` }} />
         <CanvasGlow />
         <SmoothScroll>{children}</SmoothScroll>
+        {/* Vercel Web Analytics: page views, referrers, countries. No cookies. Turn on in Vercel → Analytics. */}
+        <Analytics />
       </body>
     </html>
   );

@@ -79,6 +79,62 @@ function buildFolders(list: Paper[], lang: Lang): Folder[] {
 
 const toggle = (set: string[], v: string) => (set.includes(v) ? set.filter((x) => x !== v) : [...set, v]);
 
+// ---- URL <-> view ----
+// ?type=board,supp &medium=marathi &subject=algebra,geometry &year=2025,2024 &q=… &f=board-2025/board-2025-marathi
+// Only values that differ from the page's starting view are written; an empty value (year=) means "all".
+type View = { kinds: string[]; mediums: string[]; subjects: string[]; years: string[]; q: string; path: string[] };
+
+function defaultView(scope: Scope): View {
+  const y = scope.year;
+  const hasMain = y ? ALL.some((p) => p.kind === "pyq" && p.year === y && p.session === "main") : false;
+  return {
+    kinds: scope.kind ? (scope.kind === "pyq" ? ["board", "supp"] : [scope.kind]) : [],
+    mediums: scope.medium ? [scope.medium] : [],
+    subjects: scope.subject ? [scope.subject] : [],
+    years: y ? [String(y)] : [],
+    q: "",
+    path: y ? [hasMain ? `board-${y}` : `supp-${y}`] : [],
+  };
+}
+
+const URL_KEYS = { kinds: "type", mediums: "medium", subjects: "subject", years: "year" } as const;
+const ALLOWED: Record<keyof typeof URL_KEYS, string[]> = {
+  kinds: FKINDS,
+  mediums: MEDIUMS.map((m) => m.key),
+  subjects: FILTER_SUBJECTS.map((s) => s.key),
+  years: [...new Set(ALL.map((p) => String(p.year)))],
+};
+const same = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
+
+function viewToQuery(v: View, d: View) {
+  const sp = new URLSearchParams();
+  for (const k of Object.keys(URL_KEYS) as (keyof typeof URL_KEYS)[])
+    if (!same(v[k], d[k])) sp.set(URL_KEYS[k], v[k].map((x) => (k === "mediums" ? x.toLowerCase() : x)).join(","));
+  if (v.q.trim()) sp.set("q", v.q);
+  if (v.path.join("/") !== d.path.join("/")) sp.set("f", v.path.join("/"));
+  return sp.toString().replace(/%2C/g, ",").replace(/%2F/g, "/");
+}
+
+function viewFromUrl(search: string, hash: string, d: View): View {
+  const sp = new URLSearchParams(search);
+  const v: View = { ...d, kinds: [...d.kinds], mediums: [...d.mediums], subjects: [...d.subjects], years: [...d.years], path: [...d.path] };
+  for (const k of Object.keys(URL_KEYS) as (keyof typeof URL_KEYS)[]) {
+    const raw = sp.get(URL_KEYS[k]);
+    if (raw === null) continue;
+    const ok = ALLOWED[k];
+    v[k] = raw
+      .split(",")
+      .map((x) => x.trim())
+      .map((x) => ok.find((a) => a.toLowerCase() === x.toLowerCase()))
+      .filter((x): x is string => Boolean(x));
+  }
+  v.q = sp.get("q") ?? "";
+  const legacy = decodeURIComponent(hash.replace(/^#/, "")); // older links used #f=…
+  const f = sp.get("f") ?? (legacy.startsWith("f=") ? legacy.slice(2) : null);
+  if (f !== null) v.path = f.split("/").filter(Boolean).slice(0, 2);
+  return v;
+}
+
 export default function SscLibrary({
   email,
   scope = {},
@@ -88,15 +144,19 @@ export default function SscLibrary({
   scope?: Scope;
   heading?: { kicker?: { en: string; mr: string }; h1: { en: string; mr: string }; intro: { en: string; mr: string } };
 }) {
-  const startPath = scope.year ? [`board-${scope.year}`] : [];
+  // What this page starts with (landing pages are pre-filtered). The URL only stores differences from it.
+  const scopeKey = JSON.stringify(scope);
+  const defaults = useMemo(() => defaultView(JSON.parse(scopeKey) as Scope), [scopeKey]);
   const [lang, setLang] = useState<Lang>("en");
-  const [kinds, setKinds] = useState<string[]>(scope.kind ? (scope.kind === "pyq" ? ["board", "supp"] : [scope.kind]) : []);
-  const [mediums, setMediums] = useState<string[]>(scope.medium ? [scope.medium] : []);
-  const [subjects, setSubjects] = useState<string[]>(scope.subject ? [scope.subject] : []);
-  const [years, setYears] = useState<string[]>(scope.year ? [String(scope.year)] : []);
+  const [kinds, setKinds] = useState<string[]>(defaults.kinds);
+  const [mediums, setMediums] = useState<string[]>(defaults.mediums);
+  const [subjects, setSubjects] = useState<string[]>(defaults.subjects);
+  const [years, setYears] = useState<string[]>(defaults.years);
   const [q, setQ] = useState("");
   // Open folder: [] = folder grid, [folder] = its sub-folders, [folder, sub] = the papers.
-  const [path, setPath] = useState<string[]>(startPath);
+  const [path, setPath] = useState<string[]>(defaults.path);
+  const [hydrated, setHydrated] = useState(false);
+  const [shared, setShared] = useState(false);
   const [zip, setZip] = useState<{ d: number; n: number } | null>(null);
   const lenis = useLenis();
   const t = T[lang];
@@ -116,29 +176,62 @@ export default function SscLibrary({
     document.documentElement.lang = mr ? "mr" : "en";
   }, [lang, mr]);
 
-  // The open folder lives in the URL hash, so the phone's back button closes a folder.
-  const startKey = startPath.join("/");
+  // Filters, search and the open folder all live in the URL (?type=…&medium=…&f=…), so any view can be
+  // copied and shared, and the phone's back button closes a folder.
   useEffect(() => {
     const read = () => {
-      const h = decodeURIComponent(location.hash.replace(/^#/, ""));
-      setPath(h.startsWith("f=") ? h.slice(2).split("/").filter(Boolean) : startKey ? startKey.split("/") : []);
+      const v = viewFromUrl(location.search, location.hash, defaults);
+      setKinds(v.kinds);
+      setMediums(v.mediums);
+      setSubjects(v.subjects);
+      setYears(v.years);
+      setQ(v.q);
+      setPath(v.path);
+      setHydrated(true);
     };
     read();
     window.addEventListener("popstate", read);
     return () => window.removeEventListener("popstate", read);
-  }, [startKey]);
+  }, [defaults]);
+  const urlFor = useCallback(
+    (p: string[]) => {
+      const qs = viewToQuery({ kinds, mediums, subjects, years, q, path: p }, defaults);
+      return location.pathname + (qs ? `?${qs}` : "");
+    },
+    [kinds, mediums, subjects, years, q, defaults],
+  );
+  useEffect(() => {
+    if (!hydrated) return;
+    const next = urlFor(path);
+    if (next !== location.pathname + location.search || location.hash) history.replaceState(null, "", next);
+  }, [hydrated, urlFor, path]);
   const go = useCallback(
     (next: string[]) => {
       setPath(next);
-      history.pushState(null, "", next.length ? `#f=${next.join("/")}` : location.pathname + location.search);
+      history.pushState(null, "", urlFor(next));
       const el = document.getElementById("library");
       if (el) {
         if (lenis) lenis.scrollTo(el, { duration: 0.6 });
         else el.scrollIntoView({ behavior: "smooth" });
       }
     },
-    [lenis],
+    [lenis, urlFor],
   );
+  // Share this exact view: the phone's share sheet when there is one, otherwise copy the link.
+  async function share() {
+    const url = location.href;
+    try {
+      if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+        await navigator.share({ title: document.title, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      setTimeout(() => setShared(false), 2200);
+    } catch (e) {
+      if ((e as Error)?.name !== "AbortError") window.prompt(t.copyLink, url);
+    }
+  }
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -312,6 +405,9 @@ export default function SscLibrary({
                     {t.reset}
                   </button>
                 )}
+                <button type="button" onClick={share} className="btn-ghost !px-4 !py-2 !text-[14px]" aria-live="polite">
+                  {shared ? t.copied : t.copyLink}
+                </button>
                 <button
                   type="button"
                   onClick={() => downloadZip(inView)}

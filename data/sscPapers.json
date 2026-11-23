@@ -3176,5 +3176,61 @@
   "path": "Model-Question-Papers/Question Banks (SCERT Maharashtra)/2023/Question Bank 2023 - Geography - English Medium.pdf",
   "pages": 28,
   "sizeKB": 5925
+ },
+ {
+  "kind": "pyq",
+  "year": 2021,
+  "exam": "September 2021",
+  "session": "supplementary",
+  "medium": "English",
+  "subject": "algebra",
+  "variant": null,
+  "code": "N 172",
+  "title": "Maths 1 Algebra - English Medium",
+  "path": "PYQ-Papers/2021/Supplementary Exam - September 2021/SSC September 2021 Supplementary - Maths 1 Algebra - English Medium.pdf",
+  "pages": 9,
+  "sizeKB": 727
+ },
+ {
+  "kind": "pyq",
+  "year": 2021,
+  "exam": "September 2021",
+  "session": "supplementary",
+  "medium": "English",
+  "subject": "geometry",
+  "variant": null,
+  "code": "N 185",
+  "title": "Maths 2 Geometry - English Medium",
+  "path": "PYQ-Papers/2021/Supplementary Exam - September 2021/SSC September 2021 Supplementary - Maths 2 Geometry - English Medium.pdf",
+  "pages": 11,
+  "sizeKB": 894
+ },
+ {
+  "kind": "pyq",
+  "year": 2021,
+  "exam": "September 2021",
+  "session": "supplementary",
+  "medium": "English",
+  "subject": "science1",
+  "variant": null,
+  "code": "N 197",
+  "title": "Science 1 - English Medium",
+  "path": "PYQ-Papers/2021/Supplementary Exam - September 2021/SSC September 2021 Supplementary - Science 1 - English Medium.pdf",
+  "pages": 11,
+  "sizeKB": 567
+ },
+ {
+  "kind": "pyq",
+  "year": 2021,
+  "exam": "September 2021",
+  "session": "supplementary",
+  "medium": "English",
+  "subject": "science2",
+  "variant": null,
+  "code": "N 210",
+  "title": "Science 2 - English Medium",
+  "path": "PYQ-Papers/2021/Supplementary Exam - September 2021/SSC September 2021 Supplementary - Science 2 - English Medium.pdf",
+  "pages": 11,
+  "sizeKB": 425
  }
 ]

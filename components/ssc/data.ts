@@ -60,6 +60,19 @@ const count = (f: (p: Paper) => boolean) => ALL.filter(f).length;
 const yearLandings: Landing[] = pyqYears.map((y) => {
   const n = count((p) => p.kind === "pyq" && p.year === y);
   const hasMr = ALL.some((p) => p.year === y && p.medium === "Marathi");
+  // 2021: March exam cancelled (COVID); only a September exam in four subjects was held.
+  if (!ALL.some((p) => p.kind === "pyq" && p.year === y && p.session === "main"))
+    return {
+      slug: `ssc-board-paper-${y}`,
+      scope: { kind: "pyq", year: y },
+      title: `Maharashtra SSC Board Question Paper ${y} PDF – September ${y} Exam (Maths & Science)`,
+      description: `The March ${y} SSC exam was cancelled due to COVID. Download the ${n} papers of the September ${y} Maharashtra SSC exam as free PDFs: Algebra, Geometry, Science 1 and Science 2. दहावी बोर्ड प्रश्नपत्रिका ${y}.`,
+      h1: { en: `SSC Board Papers ${y}`, mr: `दहावी बोर्ड प्रश्नपत्रिका ${y}` },
+      intro: {
+        en: `The March ${y} exam was cancelled due to COVID. The board held one exam in September ${y}, for Algebra, Geometry, Science 1 and Science 2. Those ${n} papers are here.`,
+        mr: `मार्च ${y} ची परीक्षा कोविडमुळे रद्द झाली. बोर्डाने सप्टेंबर ${y} मध्ये बीजगणित, भूमिती, विज्ञान १ व २ यांची परीक्षा घेतली. त्या ${n} प्रश्नपत्रिका येथे आहेत.`,
+      },
+    };
   return {
     slug: `ssc-board-paper-${y}`,
     scope: { kind: "pyq", year: y },

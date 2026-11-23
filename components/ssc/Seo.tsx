@@ -12,9 +12,9 @@ export const FAQ: { q: string; a: string; qm: string; am: string }[] = [
   },
   {
     q: "Which years of SSC board papers are available?",
-    a: "March board papers from 2019 to 2026, plus the supplementary (June-July and August) exams where they exist. There are no 2021 papers because the 2021 SSC exam was cancelled due to COVID, and the March 2020 Geography paper was also cancelled.",
+    a: "March board papers from 2019 to 2026, plus the supplementary (June-July, August and September) exams where they exist. The March 2021 exam was cancelled due to COVID; the September 2021 exam papers for Algebra, Geometry, Science 1 and Science 2 are included. The March 2020 Geography paper was also cancelled.",
     qm: "कोणत्या वर्षांच्या प्रश्नपत्रिका उपलब्ध आहेत?",
-    am: "२०१९ ते २०२६ च्या मार्च बोर्ड परीक्षा, आणि जिथे उपलब्ध आहेत तिथे पुरवणी परीक्षा. २०२१ ची परीक्षा कोविडमुळे रद्द झाली, आणि मार्च २०२० चा भूगोलाचा पेपरही रद्द झाला होता.",
+    am: "२०१९ ते २०२६ च्या मार्च बोर्ड परीक्षा, आणि जिथे उपलब्ध आहेत तिथे पुरवणी परीक्षा. मार्च २०२१ ची परीक्षा कोविडमुळे रद्द झाली; सप्टेंबर २०२१ च्या बीजगणित, भूमिती, विज्ञान १ व २ च्या प्रश्नपत्रिका दिल्या आहेत. मार्च २०२० चा भूगोलाचा पेपरही रद्द झाला होता.",
   },
   {
     q: "Are Marathi medium SSC papers available?",
