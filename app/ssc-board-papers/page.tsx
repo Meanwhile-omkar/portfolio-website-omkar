@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import SscLibrary from "@/components/ssc/SscLibrary";
-import { BrowseHub, Faq, JsonLd, PaperIndex } from "@/components/ssc/Seo";
+import { BrowseHub, Faq, JsonLd, PaperIndex, PaperMatrix } from "@/components/ssc/Seo";
 import { ALL, BASE_PATH, SSC_SITE_NAME } from "@/components/ssc/data";
 import { profile } from "@/data/profile";
 
 const boardCount = ALL.filter((p) => p.kind === "pyq").length;
-const TITLE = "Maharashtra SSC Board Question Papers 2019–2026 PDF (PYQ) – English & Marathi Medium";
+const TITLE = "SSC Previous Year Question Papers PDF – Maharashtra Board 2019–2026";
 const DESCRIPTION = `Free Maharashtra SSC (Class 10) previous year board question papers 2019–2026: ${boardCount} real papers in English and Marathi medium, plus prelim papers and SCERT question banks. Algebra, Geometry, Science 1 & 2, History, Geography, Marathi, Hindi, English. दहावी बोर्ड प्रश्नपत्रिका PDF.`;
 
 export const metadata: Metadata = {
@@ -52,6 +52,7 @@ export default function SscBoardPapersPage() {
         withFaq
       />
       <SscLibrary email={profile.contact.email} />
+      <PaperMatrix />
       <BrowseHub />
       <Faq />
       <PaperIndex papers={ORDERED} />

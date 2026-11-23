@@ -59,11 +59,11 @@ export function examLabel(exam: string, lang: Lang) {
 
 export const T = {
   en: {
-    kicker: "Maharashtra State Board · Class 10",
+    kicker: "Maharashtra State Board · Class 10 · Previous year question papers",
     title: "SSC board papers,",
     titleHl: "all in one place.",
     intro:
-      "Real board exam papers from 2019 to 2026, school prelims, and the official SCERT question banks. Free to open and download. I checked every paper's code and date by hand.",
+      "Maharashtra SSC previous year question papers (PYQ) from 2019 to 2026, in English and Marathi medium, plus school prelims and the official SCERT question bank. Free PDF download, no login. I checked every paper's code and date by hand.",
     stats: (b: number, y: number, p: number) => [`${b} board papers`, `${y} years`, `${p} practice papers`],
     tabs: { pyq: "Board papers", prelim: "Prelims & practice", qbank: "Question banks", model: "Model papers" },
     tabHints: {

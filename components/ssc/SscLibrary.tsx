@@ -139,9 +139,11 @@ export default function SscLibrary({
   email,
   scope = {},
   heading,
+  lead,
 }: {
   email: string;
   scope?: Scope;
+  lead?: React.ReactNode;
   heading?: { kicker?: { en: string; mr: string }; h1: { en: string; mr: string }; intro: { en: string; mr: string } };
 }) {
   // What this page starts with (landing pages are pre-filtered). The URL only stores differences from it.
@@ -327,6 +329,7 @@ export default function SscLibrary({
           )}
         </h1>
         <p className="mt-5 max-w-2xl text-[17px] leading-relaxed md:text-[19px]">{heading ? heading.intro[lang] : t.intro}</p>
+        {lead}
         {!heading && (
           <div className="mt-6 flex flex-wrap gap-3">
             {t.stats(counts.board, counts.years, counts.practice).map((s, i) => (

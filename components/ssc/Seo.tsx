@@ -1,7 +1,8 @@
 // Server-rendered SEO pieces for the SSC papers pages: JSON-LD, the "browse by" link hub and the FAQ.
 import { SITE_URL } from "@/lib/site";
 import { profile } from "@/data/profile";
-import { BASE_PATH, LANDINGS, SSC_SITE_NAME, fileAbs, fileHref, paperName, type Paper } from "./data";
+import { BASE_PATH, LANDINGS, SSC_SITE_NAME, SUBJECT_YEARS, fileAbs, fileHref, paperName, subjectYearSlug, type Paper } from "./data";
+import { SUBJECTS } from "./i18n";
 
 export const FAQ: { q: string; a: string; qm: string; am: string }[] = [
   {
@@ -61,6 +62,7 @@ export function JsonLd({
   const graph: Record<string, unknown>[] = [
     {
       "@type": "CollectionPage",
+      dateModified: new Date().toISOString().slice(0, 10),
       "@id": `${url}#page`,
       url,
       name,
@@ -115,9 +117,9 @@ export function JsonLd({
 // Internal links to every landing page. Helps students and search engines find the year/subject pages.
 export function BrowseHub({ current }: { current?: string }) {
   const groups: [string, string, typeof LANDINGS][] = [
-    ["By year", "वर्षानुसार", LANDINGS.filter((l) => l.scope.year)],
-    ["By subject", "विषयानुसार", LANDINGS.filter((l) => l.scope.subject)],
-    ["By medium & type", "माध्यम व प्रकारानुसार", LANDINGS.filter((l) => !l.scope.year && !l.scope.subject)],
+    ["By year", "वर्षानुसार", LANDINGS.filter((l) => l.group === "year")],
+    ["By subject", "विषयानुसार", LANDINGS.filter((l) => l.group === "subject")],
+    ["By medium & type", "माध्यम व प्रकारानुसार", LANDINGS.filter((l) => l.group === "medium" || l.group === "other")],
   ];
   return (
     <section aria-labelledby="browse-h" className="mx-auto max-w-6xl px-4 pb-16">
@@ -212,6 +214,142 @@ export function PaperIndex({ papers }: { papers: Paper[] }) {
           ))}
         </div>
       </details>
+    </section>
+  );
+}
+
+// "SSC English question paper 2025" style quick links: every subject with a chip per year.
+// Useful for students who know exactly what they want, and gives search engines a clear map of the pages.
+export function PaperMatrix({ subject }: { subject?: string }) {
+  const rows = subject ? SUBJECT_YEARS.filter((r) => r.key === subject) : SUBJECT_YEARS;
+  const color = Object.fromEntries(SUBJECTS.map((s) => [s.key, s.color]));
+  const mr = Object.fromEntries(SUBJECTS.map((s) => [s.key, s.mr]));
+  return (
+    <section aria-labelledby="matrix-h" className="mx-auto max-w-6xl px-4 pb-14">
+      <h2 id="matrix-h" className="font-marker text-[40px] leading-none text-ink">
+        {subject ? "Pick a year" : "SSC question paper by subject and year"}{" "}
+        <span className="ssc-deva text-[0.6em] text-ink-soft">· {subject ? "वर्ष निवडा" : "विषय व वर्षानुसार प्रश्नपत्रिका"}</span>
+      </h2>
+      <ul className="mt-5 grid gap-3 md:grid-cols-2">
+        {rows.map((r) => (
+          <li key={r.key} className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink/10 bg-white p-3">
+            <span className="mr-1 flex min-w-[150px] items-center gap-2 text-[15px] font-semibold text-ink">
+              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: color[r.key] }} />
+              {r.name}
+              <span className="ssc-deva text-[13px] font-medium text-ink-soft">{mr[r.key]}</span>
+            </span>
+            {r.years.map((y) => (
+              <a
+                key={y}
+                href={`${BASE_PATH}/${subjectYearSlug(r.key, y)}`}
+                title={`SSC ${r.name} question paper ${y}`}
+                className="rounded-full border-2 border-ink/15 px-2.5 py-0.5 font-mono text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white"
+              >
+                {y}
+              </a>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// Plain facts table for a subject-and-year page: every paper with code, marks, time and direct links.
+// Shown above the library so a student who searched for one paper gets it immediately.
+export function QuickPapers({ papers, heading }: { papers: Paper[]; heading: string }) {
+  const rows = [...papers].sort((a, b) => (a.session === "supplementary" ? 1 : 0) - (b.session === "supplementary" ? 1 : 0) || (a.medium ?? a.variant ?? "").localeCompare(b.medium ?? b.variant ?? ""));
+  return (
+    <div className="mt-7 overflow-hidden rounded-2xl border-2 border-ink bg-white shadow-[4px_4px_0_#1d1d1f]">
+      <p className="border-b-2 border-ink bg-[#fff4c2] px-4 py-2 text-[14px] font-semibold text-ink">{heading}</p>
+      <table className="w-full text-left text-[14px]">
+        <thead className="text-[11px] uppercase tracking-wide text-ink-faint">
+          <tr>
+            <th className="px-3 py-2 font-medium md:px-4">Paper · exam</th>
+            <th className="px-3 py-2 text-right font-medium md:px-4">PDF</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((p) => {
+            return (
+              <tr key={p.path} className="border-t border-ink/10 align-top">
+                <td className="px-3 py-2.5 md:px-4">
+                  <span className="block font-semibold leading-tight text-ink">{p.medium ? `${p.medium} medium` : p.variant}</span>
+                  <span className={`mt-0.5 block text-[12px] ${p.session === "supplementary" ? "text-orange" : "text-ink-soft"}`}>
+                    {p.exam}
+                    {p.session === "supplementary" ? " (supplementary)" : ""}
+                  </span>
+                </td>
+                <td className="px-3 py-2.5 text-right md:px-4">
+                  <a href={fileHref(p)} target="_blank" rel="noopener" title={paperName(p)} className="block font-semibold text-blue hover:underline">
+                    View
+                  </a>
+                  <a href={fileHref(p)} download className="mt-0.5 block font-semibold text-blue hover:underline">
+                    Download
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Subject chips for a year page.
+export function YearSubjects({ year }: { year: number }) {
+  const rows = SUBJECT_YEARS.filter((r) => r.years.includes(year));
+  return (
+    <section aria-label={`Subjects in ${year}`} className="mx-auto max-w-6xl px-4 pb-12">
+      <p className="label mb-2">SSC {year} papers by subject</p>
+      <div className="flex flex-wrap gap-2">
+        {rows.map((r) => (
+          <a
+            key={r.key}
+            href={`${BASE_PATH}/${subjectYearSlug(r.key, year)}`}
+            className="rounded-full border-2 border-ink/15 px-2.5 py-0.5 text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white"
+          >
+            {r.name} {year}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Sideways links on a subject-and-year page: same subject in other years, other subjects in the same year.
+export function RelatedLinks({ subject, year }: { subject: string; year: number }) {
+  const same = SUBJECT_YEARS.find((r) => r.key === subject);
+  const others = SUBJECT_YEARS.filter((r) => r.key !== subject && r.years.includes(year));
+  const chip = "rounded-full border-2 border-ink/15 px-2.5 py-0.5 text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white";
+  return (
+    <section aria-label="Related papers" className="mx-auto grid max-w-6xl gap-4 px-4 pb-12 md:grid-cols-2">
+      <div>
+        <p className="label mb-2">{same?.name} · other years</p>
+        <div className="flex flex-wrap gap-2">
+          {same?.years
+            .filter((y) => y !== year)
+            .map((y) => (
+              <a key={y} href={`${BASE_PATH}/${subjectYearSlug(subject, y)}`} className={chip}>
+                {same.name} {y}
+              </a>
+            ))}
+        </div>
+      </div>
+      <div>
+        <p className="label mb-2">Other subjects · {year}</p>
+        <div className="flex flex-wrap gap-2">
+          {others.map((r) => (
+            <a key={r.key} href={`${BASE_PATH}/${subjectYearSlug(r.key, year)}`} className={chip}>
+              {r.name} {year}
+            </a>
+          ))}
+          <a href={`${BASE_PATH}/ssc-board-paper-${year}`} className={chip}>
+            All {year} papers
+          </a>
+        </div>
+      </div>
     </section>
   );
 }

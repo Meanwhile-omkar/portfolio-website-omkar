@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SscLibrary from "@/components/ssc/SscLibrary";
-import { BrowseHub, JsonLd, PaperIndex } from "@/components/ssc/Seo";
+import { BrowseHub, JsonLd, PaperIndex, PaperMatrix, QuickPapers, RelatedLinks, YearSubjects } from "@/components/ssc/Seo";
 import { BASE_PATH, LANDINGS, SSC_SITE_NAME, landingBySlug, papersInScope } from "@/components/ssc/data";
 import { profile } from "@/data/profile";
 
@@ -50,7 +50,11 @@ export default async function LandingPage({ params }: Props) {
         email={profile.contact.email}
         scope={l.scope}
         heading={{ kicker: { en: "Maharashtra SSC · Class 10", mr: "महाराष्ट्र एसएससी · इयत्ता १०वी" }, h1: l.h1, intro: l.intro }}
+        lead={l.group === "subjectYear" ? <QuickPapers papers={papers} heading={`${l.h1.en}: all papers`} /> : undefined}
       />
+      {l.group === "subjectYear" && l.scope.subject && l.scope.year && <RelatedLinks subject={l.scope.subject} year={l.scope.year} />}
+      {l.group === "subject" && l.scope.subject && <PaperMatrix subject={l.scope.subject} />}
+      {l.group === "year" && l.scope.year && <YearSubjects year={l.scope.year} />}
       <BrowseHub current={l.slug} />
       <PaperIndex papers={papers} />
     </main>

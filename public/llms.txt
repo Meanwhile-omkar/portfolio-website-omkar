@@ -1,0 +1,32 @@
+# omkarharyan.paperkitelabs.com
+
+> Personal site of Omkar Haryan (data science student, Mumbai) and home of "SSC Board Papers · Maharashtra", a free library of Maharashtra SSC (Class 10) previous year board question papers.
+
+## SSC Board Papers · Maharashtra
+
+Free PDFs of real Maharashtra State Board (MSBSHSE) SSC / Class 10 board question papers, checked against the paper code and exam date printed on each paper. No login.
+
+- Board papers: March 2019–2026, plus supplementary exams (June-July, August, September). The March 2021 exam was cancelled due to COVID; the September 2021 papers for Algebra, Geometry, Science 1 and Science 2 are included.
+- Subjects: Algebra (Maths 1), Geometry (Maths 2), Science 1, Science 2, History and Political Science, Geography, Marathi, Hindi, English, Sanskrit, Urdu, Arabic, German.
+- Mediums: English and Marathi medium for all main subjects (2022–2026), plus Hindi, Urdu and Kannada medium where the board printed them. Language papers are the same for every medium.
+- Also: school prelim papers (2024-25, 2025-26), SCERT Maharashtra question banks (2022, 2023), model papers.
+- Paper pattern: language papers 80 marks, 3 hours (composite papers 40 marks, 2 hours); Maths 1 and 2, Science 1 and 2, History and Geography 40 marks, 2 hours each.
+
+## Key pages
+
+- [All SSC board papers](https://omkarharyan.paperkitelabs.com/ssc-board-papers): every paper, filter by year, subject and medium
+- [SSC board paper 2026](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-board-paper-2026)
+- [SSC board paper 2025](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-board-paper-2025)
+- [SSC board paper 2024](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-board-paper-2024)
+- [SSC English question paper 2025](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-english-question-paper-2025)
+- [SSC Algebra question paper 2025](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-algebra-question-paper-2025)
+- [Marathi medium papers](https://omkarharyan.paperkitelabs.com/ssc-board-papers/marathi-medium-question-papers)
+- [SSC prelim papers](https://omkarharyan.paperkitelabs.com/ssc-board-papers/prelim-question-papers)
+- [SCERT Maharashtra question bank](https://omkarharyan.paperkitelabs.com/ssc-board-papers/question-bank)
+- [Sitemap](https://omkarharyan.paperkitelabs.com/sitemap.xml)
+
+Page URLs follow the pattern /ssc-board-papers/ssc-{subject}-question-paper-{year}, for example ssc-geometry-question-paper-2024 or ssc-marathi-question-paper-2023.
+
+## About Omkar
+
+- [Portfolio](https://omkarharyan.paperkitelabs.com/): internships, projects and case competition wins

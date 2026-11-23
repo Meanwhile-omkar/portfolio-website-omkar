@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE_URL}${BASE_PATH}/${l.slug}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
-      priority: l.scope.year ? 0.8 : 0.7,
+      priority: l.group === "year" ? 0.8 : l.group === "subjectYear" || l.group === "subject" ? 0.7 : 0.6,
     })),
   ];
 }

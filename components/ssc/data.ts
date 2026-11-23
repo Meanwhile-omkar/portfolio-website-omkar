@@ -40,13 +40,14 @@ export function paperName(p: Paper) {
   const s = SUBJ[p.subject]?.en.replace(" · ", " ") ?? p.subject;
   const who = p.medium ? `${p.medium} Medium` : p.variant ?? "";
   if (p.kind === "pyq")
-    return `Maharashtra SSC ${s} ${who} Board Question Paper ${p.exam}${p.session === "supplementary" ? " (Supplementary)" : ""}${p.code ? ` – ${p.code}` : ""}`;
+    return `Maharashtra SSC ${s} ${who} Board Question Paper ${p.exam}${p.session === "supplementary" ? " (Supplementary)" : ""}`;
   return `Maharashtra SSC ${p.title}`;
 }
 
 export type Scope = { kind?: Kind; year?: number; subject?: string; medium?: string };
 export type Landing = {
   slug: string;
+  group: "year" | "subject" | "subjectYear" | "medium" | "other";
   scope: Scope;
   title: string; // <title>
   description: string;
@@ -64,8 +65,9 @@ const yearLandings: Landing[] = pyqYears.map((y) => {
   if (!ALL.some((p) => p.kind === "pyq" && p.year === y && p.session === "main"))
     return {
       slug: `ssc-board-paper-${y}`,
+      group: "year",
       scope: { kind: "pyq", year: y },
-      title: `Maharashtra SSC Board Question Paper ${y} PDF – September ${y} Exam (Maths & Science)`,
+      title: `SSC Board Paper ${y} PDF – Maharashtra Board September ${y} Exam`,
       description: `The March ${y} SSC exam was cancelled due to COVID. Download the ${n} papers of the September ${y} Maharashtra SSC exam as free PDFs: Algebra, Geometry, Science 1 and Science 2. दहावी बोर्ड प्रश्नपत्रिका ${y}.`,
       h1: { en: `SSC Board Papers ${y}`, mr: `दहावी बोर्ड प्रश्नपत्रिका ${y}` },
       intro: {
@@ -75,10 +77,11 @@ const yearLandings: Landing[] = pyqYears.map((y) => {
     };
   return {
     slug: `ssc-board-paper-${y}`,
+    group: "year",
     scope: { kind: "pyq", year: y },
-    title: `Maharashtra SSC Board Question Paper ${y} PDF – All Subjects${hasMr ? " (English & Marathi Medium)" : ""}`,
+    title: `SSC Board Paper ${y} PDF Download – Maharashtra Board (All Subjects)`,
     description: `Download all ${n} Maharashtra SSC (Class 10) board question papers of ${y} as free PDFs: Algebra, Geometry, Science 1 & 2, History, Geography, Marathi, Hindi, English and more${hasMr ? ", in English and Marathi medium" : ""}. दहावी बोर्ड प्रश्नपत्रिका ${y}.`,
-    h1: { en: `SSC Board Papers ${y}`, mr: `दहावी बोर्ड प्रश्नपत्रिका ${y}` },
+    h1: { en: `SSC Board Paper ${y}`, mr: `दहावी बोर्ड प्रश्नपत्रिका ${y}` },
     intro: {
       en: `All ${n} papers from the ${y} Maharashtra SSC board exam${y >= 2023 ? ", including the supplementary exam" : ""}. Real board papers with their paper codes, free to open.`,
       mr: `${y} च्या महाराष्ट्र एसएससी बोर्ड परीक्षेतील सर्व ${n} प्रश्नपत्रिका. पेपर कोडसह खऱ्या बोर्ड प्रश्नपत्रिका, मोफत.`,
@@ -108,10 +111,11 @@ const subjectLandings: Landing[] = Object.entries(SUBJECT_SLUGS).map(([key, slug
   const core = !["marathi", "hindi", "english", "sanskrit", "urdu"].includes(key);
   return {
     slug,
+    group: "subject",
     scope: { kind: "pyq", subject: key },
-    title: `SSC ${name} Board Question Papers ${lo}–${hi} PDF${core ? " – English & Marathi Medium" : ""}`,
+    title: `SSC ${name} Question Paper PDF ${lo}–${hi} – Maharashtra Board`,
     description: `Every Maharashtra SSC ${name} board paper from ${lo} to ${hi} (${ps.length} papers) as free PDFs${core ? " in English, Marathi and other mediums" : ""}, plus prelim papers. दहावी ${s.mr} बोर्ड प्रश्नपत्रिका.`,
-    h1: { en: `SSC ${name} papers`, mr: `दहावी ${s.mr} प्रश्नपत्रिका` },
+    h1: { en: `SSC ${name} question papers`, mr: `दहावी ${s.mr} प्रश्नपत्रिका` },
     intro: {
       en: `${ps.length} real board papers of ${name} from ${lo} to ${hi}, newest first${core ? ", in every medium the board printed" : ""}. Pick your medium below.`,
       mr: `${lo} ते ${hi} मधील ${s.mr} विषयाच्या ${ps.length} खऱ्या बोर्ड प्रश्नपत्रिका, नवीन आधी. खाली तुमचे माध्यम निवडा.`,
@@ -124,8 +128,9 @@ const mediumLandings: Landing[] = (["Marathi", "English"] as const).map((m) => {
   const n = count((p) => p.kind === "pyq" && p.medium === m);
   return {
     slug: `${m.toLowerCase()}-medium-question-papers`,
+    group: "medium",
     scope: { kind: "pyq", medium: m },
-    title: `SSC ${m} Medium Board Question Papers PDF – Maths, Science, History, Geography`,
+    title: `SSC ${m} Medium Question Papers PDF – Maharashtra Board Class 10`,
     description: `Maharashtra SSC ${m} medium board papers (${n} papers) for Algebra, Geometry, Science 1 & 2, History and Geography, plus all language papers. Free PDFs. ${mm.mr} दहावी प्रश्नपत्रिका.`,
     h1: { en: `SSC ${m} medium papers`, mr: `${mm.mr} दहावी प्रश्नपत्रिका` },
     intro: {
@@ -138,8 +143,9 @@ const mediumLandings: Landing[] = (["Marathi", "English"] as const).map((m) => {
 const otherLandings: Landing[] = [
   {
     slug: "prelim-question-papers",
+    group: "other",
     scope: { kind: "prelim" },
-    title: "SSC Prelim Question Papers 2025-26 PDF – Maharashtra Board Class 10 Practice Papers",
+    title: "SSC Prelim Question Papers 2025-26 PDF – Maharashtra Board Practice Papers",
     description: `Free Maharashtra SSC prelim (preliminary) and practice exam papers for 2025-26 and 2024-25: Algebra, Geometry, Science, History, Geography, Marathi, Hindi, English. दहावी सराव परीक्षा प्रश्नपत्रिका.`,
     h1: { en: "SSC prelim & practice papers", mr: "दहावी सराव / पूर्व परीक्षा प्रश्नपत्रिका" },
     intro: {
@@ -149,10 +155,11 @@ const otherLandings: Landing[] = [
   },
   {
     slug: "question-bank",
+    group: "other",
     scope: { kind: "qbank" },
-    title: "SSC Question Bank PDF (SCERT Maharashtra) – English & Marathi Medium",
-    description: "Official SCERT Maharashtra question banks for SSC (Class 10): Maths, Science, History, Geography, English and Marathi, in English and Marathi medium. Free PDFs. दहावी प्रश्नपेढी.",
-    h1: { en: "SSC question banks", mr: "दहावी प्रश्नपेढी" },
+    title: "SCERT Maharashtra Question Bank PDF – SSC Class 10 (English & Marathi Medium)",
+    description: "Official SCERT Maharashtra question bank for SSC (Class 10), 2022 and 2023: Maths, Science, History, Geography, English and Marathi, in English and Marathi medium. Free PDF download. दहावी प्रश्नपेढी SCERT.",
+    h1: { en: "SCERT Maharashtra question bank (SSC)", mr: "SCERT दहावी प्रश्नपेढी" },
     intro: {
       en: "Chapter-wise practice questions published by SCERT Maharashtra, in English and Marathi medium.",
       mr: "SCERT महाराष्ट्रने प्रकाशित केलेली धडानिहाय सराव प्रश्नपेढी, इंग्रजी व मराठी माध्यमात.",
@@ -160,7 +167,56 @@ const otherLandings: Landing[] = [
   },
 ];
 
-export const LANDINGS: Landing[] = [...yearLandings, ...subjectLandings, ...mediumLandings, ...otherLandings];
+// Marks and time of a paper, from the board's pattern (revised course, 2019 onwards).
+export function patternOf(p: Paper) {
+  const lang = ["marathi", "hindi", "english", "sanskrit", "urdu", "arabic", "german"].includes(p.subject);
+  return lang && p.variant !== "Composite" && !p.variant?.startsWith("Composite") ? { marks: 80, hours: 3 } : { marks: 40, hours: 2 };
+}
+
+// One page per subject per year, e.g. /ssc-board-papers/ssc-english-question-paper-2025. These match how
+// students actually search ("ssc english question paper 2025 maharashtra board") and carry citable facts.
+const SY_SLUG: Record<string, string> = {
+  algebra: "algebra", geometry: "geometry", science1: "science-1", science2: "science-2", history: "history", geography: "geography",
+  marathi: "marathi", hindi: "hindi", english: "english", sanskrit: "sanskrit", urdu: "urdu", arabic: "arabic", german: "german",
+};
+const SY_NAME: Record<string, string> = {
+  algebra: "Algebra (Maths 1)", geometry: "Geometry (Maths 2)", science1: "Science 1", science2: "Science 2", history: "History",
+  geography: "Geography", marathi: "Marathi", hindi: "Hindi", english: "English", sanskrit: "Sanskrit", urdu: "Urdu", arabic: "Arabic", german: "German",
+};
+export const subjectYearSlug = (key: string, y: number) => `ssc-${SY_SLUG[key]}-question-paper-${y}`;
+export const SUBJECT_YEARS: { key: string; name: string; years: number[] }[] = Object.keys(SY_SLUG).map((key) => ({
+  key,
+  name: SY_NAME[key],
+  years: [...new Set(ALL.filter((p) => p.kind === "pyq" && p.subject === key).map((p) => p.year as number))].sort((a, b) => b - a),
+}));
+
+const describe = (p: Paper) => (p.medium ? `${p.medium} medium` : p.variant ?? "");
+const subjectYearLandings: Landing[] = SUBJECT_YEARS.flatMap(({ key, name, years }) =>
+  years.map((y) => {
+    const s = SUBJ[key];
+    const ps = ALL.filter((p) => p.kind === "pyq" && p.subject === key && p.year === y);
+    const main = ps.filter((p) => p.session === "main");
+    const supp = ps.filter((p) => p.session === "supplementary");
+    const exam = (main[0] ?? supp[0]).exam as string;
+    const pat = patternOf(main[0] ?? supp[0]);
+    const list = (main.length ? main : supp).map(describe).join(", ");
+    const suppNote = main.length && supp.length ? ` The ${supp[0].exam} supplementary paper is included too.` : "";
+    return {
+      slug: subjectYearSlug(key, y),
+      group: "subjectYear" as const,
+      scope: { kind: "pyq" as const, year: y, subject: key },
+      title: `SSC ${name} Question Paper ${y} PDF – Maharashtra Board`,
+      description: `Maharashtra SSC ${name} board question paper, ${exam}: ${list}. ${pat.marks} marks, ${pat.hours} hours. Free PDF to view or download.${suppNote} दहावी ${s.mr} प्रश्नपत्रिका ${y}.`,
+      h1: { en: `SSC ${name} Question Paper ${y}`, mr: `दहावी ${s.mr} प्रश्नपत्रिका ${y}` },
+      intro: {
+        en: `The ${exam} Maharashtra SSC ${name} board paper${main.length + supp.length > 1 ? "s" : ""}: ${list}.${suppNote} Open or download below.`,
+        mr: `${exam} च्या महाराष्ट्र एसएससी ${s.mr} बोर्ड प्रश्नपत्रिका: ${list}. खाली उघडा किंवा डाउनलोड करा.`,
+      },
+    };
+  }),
+);
+
+export const LANDINGS: Landing[] = [...yearLandings, ...subjectLandings, ...mediumLandings, ...otherLandings, ...subjectYearLandings];
 export const landingBySlug = (slug: string) => LANDINGS.find((l) => l.slug === slug);
 export const papersInScope = (s: Scope) =>
   ALL.filter(
