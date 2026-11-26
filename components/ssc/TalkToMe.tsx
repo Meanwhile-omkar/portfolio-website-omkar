@@ -85,6 +85,7 @@ export default function TalkToMe({ lang, email }: { lang: Lang; email: string })
   const [found, setFound] = useState<string>("");
   const [reach, setReach] = useState("");
   const [reachErr, setReachErr] = useState(false);
+  const [started, setStarted] = useState(false);
   const [state, setState] = useState<"idle" | "sending" | "ok" | "fail">("idle");
   const needReach = topic !== "thanks";
 
@@ -161,7 +162,18 @@ export default function TalkToMe({ lang, email }: { lang: Lang; email: string })
             <p className="font-note text-[20px] text-ink">{reach.trim() ? w.okReply : w.ok}</p>
           </div>
         ) : (
-          <form onSubmit={submit} noValidate className="grid gap-3" data-clarity-mask="true">
+          <form
+            onSubmit={submit}
+            onFocusCapture={() => {
+              if (!started) {
+                setStarted(true);
+                track("form_started", { form_topic: topic });
+              }
+            }}
+            noValidate
+            className="grid gap-3"
+            data-clarity-mask="true"
+          >
             <fieldset>
               <legend className="label mb-2">{w.about}</legend>
               <div className="flex flex-wrap gap-2">

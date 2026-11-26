@@ -266,8 +266,13 @@ export default function SscLibrary({
   const [lastFilters, setLastFilters] = useState<string | null>(null);
   useEffect(() => {
     if (!hydrated) return;
-    if (lastFilters !== null && lastFilters !== filterKey)
+    if (lastFilters !== null && lastFilters !== filterKey) {
+      // One event per filter row that changed (filter_medium, filter_subject…), handy as funnel steps.
+      const before = lastFilters.split("|"), after = filterKey.split("|");
+      ["filter_type", "filter_medium", "filter_subject", "filter_year"].forEach((ev, i) => before[i] !== after[i] && track(ev));
       track("filters_changed", { f_type: kinds.join(","), f_medium: mediums.join(","), f_subject: subjects.join(","), f_year: years.join(",") });
+      if (mediums.includes(SEMI)) track("used_semi_english");
+    }
     setLastFilters(filterKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, filterKey]);
@@ -300,7 +305,10 @@ export default function SscLibrary({
   async function downloadZip(list: Paper[]) {
     if (!list.length || zip) return;
     track("zip_download", { zip_count: list.length });
-    if (list.length > 40 && !confirm(t.zipBig(list.length))) return;
+    if (list.length > 40 && !confirm(t.zipBig(list.length))) {
+      track("zip_cancelled", { zip_count: list.length });
+      return;
+    }
     const { default: JSZip } = await import("jszip");
     const z = new JSZip();
     let done = 0;
@@ -320,6 +328,7 @@ export default function SscLibrary({
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `SSC-papers-${list.length}.zip`;
+    track("zip_finished", { zip_count: list.length });
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 30000);
     setZip(null);
