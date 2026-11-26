@@ -44,10 +44,21 @@ export function paperName(p: Paper) {
   return `Maharashtra SSC ${p.title}`;
 }
 
+// Semi-English medium: the board prints no separate paper. Semi-English students write Maths and Science
+// in English and History-Geography in Marathi, so they use those papers (language papers are common to all).
+export const SEMI = "SemiEnglish";
+const SEMI_EN = new Set(["algebra", "geometry", "science1", "science2", "maths", "science"]);
+const SEMI_MR = new Set(["history", "geography"]);
+export function inMedium(p: Paper, m: string) {
+  if (!p.medium) return true; // language papers are the same for every medium
+  if (m === SEMI) return SEMI_EN.has(p.subject) ? p.medium === "English" : SEMI_MR.has(p.subject) ? p.medium === "Marathi" : false;
+  return p.medium === m;
+}
+
 export type Scope = { kind?: Kind; year?: number; subject?: string; medium?: string };
 export type Landing = {
   slug: string;
-  group: "year" | "subject" | "subjectYear" | "medium" | "other";
+  group: "year" | "subject" | "subjectYear" | "medium" | "mediumYear" | "other";
   scope: Scope;
   title: string; // <title>
   description: string;
@@ -80,7 +91,7 @@ const yearLandings: Landing[] = pyqYears.map((y) => {
     group: "year",
     scope: { kind: "pyq", year: y },
     title: `SSC Board Paper ${y} PDF Download – Maharashtra Board (All Subjects)`,
-    description: `Download all ${n} Maharashtra SSC (Class 10) board question papers of ${y} as free PDFs: Algebra, Geometry, Science 1 & 2, History, Geography, Marathi, Hindi, English and more${hasMr ? ", in English and Marathi medium" : ""}. दहावी बोर्ड प्रश्नपत्रिका ${y}.`,
+    description: `All ${n} official Maharashtra SSC (Class 10) board question papers of ${y}, free PDF with no ads and no login: Algebra, Geometry, Science 1 & 2, History, Geography, Marathi, Hindi, English and more${hasMr ? ", in English, Semi-English and Marathi medium" : ""}. दहावी बोर्ड प्रश्नपत्रिका ${y}.`,
     h1: { en: `SSC Board Paper ${y}`, mr: `दहावी बोर्ड प्रश्नपत्रिका ${y}` },
     intro: {
       en: `All ${n} papers from the ${y} Maharashtra SSC board exam${y >= 2023 ? ", including the supplementary exam" : ""}. Real board papers with their paper codes, free to open.`,
@@ -114,7 +125,7 @@ const subjectLandings: Landing[] = Object.entries(SUBJECT_SLUGS).map(([key, slug
     group: "subject",
     scope: { kind: "pyq", subject: key },
     title: `SSC ${name} Question Paper PDF ${lo}–${hi} – Maharashtra Board`,
-    description: `Every Maharashtra SSC ${name} board paper from ${lo} to ${hi} (${ps.length} papers) as free PDFs${core ? " in English, Marathi and other mediums" : ""}, plus prelim papers. दहावी ${s.mr} बोर्ड प्रश्नपत्रिका.`,
+    description: `Every official Maharashtra SSC ${name} board paper from ${lo} to ${hi} (${ps.length} papers), free PDF with no ads${core ? ", in English, Semi-English, Marathi and other mediums" : ""}, plus prelim papers. दहावी ${s.mr} बोर्ड प्रश्नपत्रिका.`,
     h1: { en: `SSC ${name} question papers`, mr: `दहावी ${s.mr} प्रश्नपत्रिका` },
     intro: {
       en: `${ps.length} real board papers of ${name} from ${lo} to ${hi}, newest first${core ? ", in every medium the board printed" : ""}. Pick your medium below.`,
@@ -139,6 +150,35 @@ const mediumLandings: Landing[] = (["Marathi", "English"] as const).map((m) => {
     },
   };
 });
+
+const semiYears = pyqYears.filter((y) => ALL.some((p) => p.kind === "pyq" && p.year === y && p.medium && inMedium(p, SEMI)));
+const semiLandings: Landing[] = [
+  {
+    slug: "semi-english-medium-question-papers",
+    group: "medium",
+    scope: { kind: "pyq", medium: SEMI },
+    title: "SSC Semi-English Medium Question Papers PDF – Official Maharashtra Board Papers",
+    description:
+      "Official Maharashtra SSC board papers for Semi-English medium students, 2019–2026: Algebra, Geometry, Science 1 & 2 in English, History and Geography in Marathi, plus language papers. Free PDF, no ads, no login. सेमी इंग्रजी माध्यम दहावी प्रश्नपत्रिका.",
+    h1: { en: "SSC Semi-English medium papers", mr: "सेमी इंग्रजी माध्यम दहावी प्रश्नपत्रिका" },
+    intro: {
+      en: "The board does not print a separate Semi-English paper. Semi-English students write Maths and Science in English and History-Geography in Marathi, so these are exactly the official papers you sit: English medium Algebra, Geometry, Science 1 and 2, Marathi medium History and Geography, and the language papers.",
+      mr: "बोर्ड सेमी इंग्रजीसाठी वेगळी प्रश्नपत्रिका छापत नाही. सेमी इंग्रजीचे विद्यार्थी गणित व विज्ञान इंग्रजीत आणि इतिहास-भूगोल मराठीत लिहितात, म्हणून तुम्ही ज्या अधिकृत प्रश्नपत्रिका सोडवता त्याच येथे आहेत: इंग्रजी माध्यमाचे बीजगणित, भूमिती, विज्ञान १ व २, मराठी माध्यमाचे इतिहास व भूगोल, आणि भाषा विषय.",
+    },
+  },
+  ...semiYears.map((y) => ({
+    slug: `ssc-semi-english-question-paper-${y}`,
+    group: "mediumYear" as const,
+    scope: { kind: "pyq" as const, year: y, medium: SEMI },
+    title: `SSC Semi-English Medium Question Paper ${y} PDF – Maharashtra Board`,
+    description: `Official Maharashtra SSC ${y} board papers for Semi-English medium: Algebra, Geometry, Science 1 & 2 (English) and History, Geography (Marathi), plus language papers. Free PDF, no ads, no login. सेमी इंग्रजी दहावी प्रश्नपत्रिका ${y}.`,
+    h1: { en: `SSC Semi-English papers ${y}`, mr: `सेमी इंग्रजी दहावी प्रश्नपत्रिका ${y}` },
+    intro: {
+      en: `The official ${y} board papers a Semi-English medium student sits: Maths and Science in English, History and Geography in Marathi, plus the language papers. The board prints no separate Semi-English paper.`,
+      mr: `सेमी इंग्रजी माध्यमाचा विद्यार्थी ${y} मध्ये ज्या अधिकृत बोर्ड प्रश्नपत्रिका सोडवतो त्या: गणित व विज्ञान इंग्रजीत, इतिहास व भूगोल मराठीत, आणि भाषा विषय. बोर्ड सेमी इंग्रजीसाठी वेगळी प्रश्नपत्रिका छापत नाही.`,
+    },
+  })),
+];
 
 const otherLandings: Landing[] = [
   {
@@ -200,13 +240,14 @@ const subjectYearLandings: Landing[] = SUBJECT_YEARS.flatMap(({ key, name, years
     const exam = (main[0] ?? supp[0]).exam as string;
     const pat = patternOf(main[0] ?? supp[0]);
     const list = (main.length ? main : supp).map(describe).join(", ");
+    const semiNote = SEMI_EN.has(key) ? " Semi-English students use the English medium paper." : SEMI_MR.has(key) ? " Semi-English students use the Marathi medium paper." : "";
     const suppNote = main.length && supp.length ? ` The ${supp[0].exam} supplementary paper is included too.` : "";
     return {
       slug: subjectYearSlug(key, y),
       group: "subjectYear" as const,
       scope: { kind: "pyq" as const, year: y, subject: key },
       title: `SSC ${name} Question Paper ${y} PDF – Maharashtra Board`,
-      description: `Maharashtra SSC ${name} board question paper, ${exam}: ${list}. ${pat.marks} marks, ${pat.hours} hours. Free PDF to view or download.${suppNote} दहावी ${s.mr} प्रश्नपत्रिका ${y}.`,
+      description: `Official Maharashtra SSC ${name} board question paper, ${exam}: ${list}. ${pat.marks} marks, ${pat.hours} hours. Free PDF, no ads, no login.${semiNote}${suppNote} दहावी ${s.mr} प्रश्नपत्रिका ${y}.`,
       h1: { en: `SSC ${name} Question Paper ${y}`, mr: `दहावी ${s.mr} प्रश्नपत्रिका ${y}` },
       intro: {
         en: `The ${exam} Maharashtra SSC ${name} board paper${main.length + supp.length > 1 ? "s" : ""}: ${list}.${suppNote} Open or download below.`,
@@ -216,7 +257,7 @@ const subjectYearLandings: Landing[] = SUBJECT_YEARS.flatMap(({ key, name, years
   }),
 );
 
-export const LANDINGS: Landing[] = [...yearLandings, ...subjectLandings, ...mediumLandings, ...otherLandings, ...subjectYearLandings];
+export const LANDINGS: Landing[] = [...yearLandings, ...subjectLandings, ...mediumLandings, ...semiLandings, ...otherLandings, ...subjectYearLandings];
 export const landingBySlug = (slug: string) => LANDINGS.find((l) => l.slug === slug);
 export const papersInScope = (s: Scope) =>
   ALL.filter(
@@ -224,5 +265,5 @@ export const papersInScope = (s: Scope) =>
       (!s.kind || p.kind === s.kind) &&
       (!s.year || p.year === s.year) &&
       (!s.subject || p.subject === s.subject) &&
-      (!s.medium || !p.medium || p.medium === s.medium),
+      (!s.medium || inMedium(p, s.medium)),
   );

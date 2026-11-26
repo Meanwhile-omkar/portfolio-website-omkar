@@ -6,7 +6,7 @@ import { profile } from "@/data/profile";
 
 const boardCount = ALL.filter((p) => p.kind === "pyq").length;
 const TITLE = "SSC Previous Year Question Papers PDF – Maharashtra Board 2019–2026";
-const DESCRIPTION = `Free Maharashtra SSC (Class 10) previous year board question papers 2019–2026: ${boardCount} real papers in English and Marathi medium, plus prelim papers and SCERT question banks. Algebra, Geometry, Science 1 & 2, History, Geography, Marathi, Hindi, English. दहावी बोर्ड प्रश्नपत्रिका PDF.`;
+const DESCRIPTION = `Official Maharashtra SSC (Class 10) board question papers 2019–2026, free PDF with no ads and no login: ${boardCount} real papers in English, Semi-English and Marathi medium, plus prelims and SCERT question banks. Algebra, Geometry, Science, History, Geography, languages. दहावी बोर्ड प्रश्नपत्रिका.`;
 
 export const metadata: Metadata = {
   title: TITLE,

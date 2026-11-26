@@ -4,10 +4,24 @@ import { profile } from "@/data/profile";
 import { BASE_PATH, LANDINGS, SSC_SITE_NAME, SUBJECT_YEARS, fileAbs, fileHref, paperName, subjectYearSlug, type Paper } from "./data";
 import { SUBJECTS } from "./i18n";
 
+const SEMI_YEARS = LANDINGS.filter((l) => l.group === "mediumYear");
+
 export const FAQ: { q: string; a: string; qm: string; am: string }[] = [
   {
-    q: "Are these the real Maharashtra SSC board papers?",
-    a: "Yes. Every board paper here is a scan of the actual MSBSHSE exam paper. Each one shows the board's paper code (like N 919) and the exam date, and both were checked by hand against the file name.",
+    q: "Where can I download Maharashtra SSC Semi-English medium question papers?",
+    a: "Here, free. The board does not print a separate Semi-English paper: Semi-English students write Maths and Science in English and History-Geography in Marathi. Pick 'Semi-English medium' in the filters, or open the Semi-English page for a year, to get exactly those official papers (English medium Algebra, Geometry, Science 1 and 2, Marathi medium History and Geography) plus the language papers.",
+    qm: "सेमी इंग्रजी माध्यमाच्या दहावी प्रश्नपत्रिका कुठे मिळतील?",
+    am: "येथेच, मोफत. बोर्ड सेमी इंग्रजीसाठी वेगळी प्रश्नपत्रिका छापत नाही: सेमी इंग्रजीचे विद्यार्थी गणित व विज्ञान इंग्रजीत आणि इतिहास-भूगोल मराठीत लिहितात. फिल्टरमध्ये 'सेमी इंग्रजी माध्यम' निवडा, म्हणजे इंग्रजी माध्यमाचे बीजगणित, भूमिती, विज्ञान १ व २, मराठी माध्यमाचे इतिहास व भूगोल आणि भाषा विषय मिळतील.",
+  },
+  {
+    q: "Why use this site for SSC board papers?",
+    a: "It is free with no ads, no pop-ups, no login and no sign-up. Every official paper is sorted by year, medium and subject, so any paper is about two taps away, and you can download a whole folder as one ZIP. If a paper is missing, you can request it from the form on the page.",
+    qm: "एसएससी प्रश्नपत्रिकांसाठी हीच साइट का?",
+    am: "पूर्णपणे मोफत: जाहिराती नाहीत, पॉप-अप नाहीत, लॉगिन नाही. सर्व अधिकृत प्रश्नपत्रिका वर्ष, माध्यम व विषयानुसार लावल्या आहेत, त्यामुळे कोणतीही प्रश्नपत्रिका दोन टॅपमध्ये मिळते. संपूर्ण फोल्डर एका ZIP मध्ये डाउनलोड करता येतो. एखादी प्रश्नपत्रिका नसल्यास खालील फॉर्मवरून मागा.",
+  },
+  {
+    q: "Are these the official Maharashtra SSC board papers?",
+    a: "Yes. Every board paper here is the official MSBSHSE question paper from that exam: the real paper students wrote, scanned. Each one carries the board's paper code and exam date, checked by hand. The site itself is not run by the board; it is a free voluntary service by an SSC alumnus.",
     qm: "या खऱ्या बोर्ड प्रश्नपत्रिका आहेत का?",
     am: "हो. येथील प्रत्येक बोर्ड प्रश्नपत्रिका MSBSHSE च्या खऱ्या परीक्षेतील आहे. प्रत्येकीवर बोर्डाचा पेपर कोड (उदा. N 919) आणि परीक्षेची तारीख आहे, आणि ते हाताने तपासले आहेत.",
   },
@@ -231,6 +245,18 @@ export function PaperMatrix({ subject }: { subject?: string }) {
         <span className="ssc-deva text-[0.6em] text-ink-soft">· {subject ? "वर्ष निवडा" : "विषय व वर्षानुसार प्रश्नपत्रिका"}</span>
       </h2>
       <ul className="mt-5 grid gap-3 md:grid-cols-2">
+        {!subject && (
+          <li className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink/10 bg-[#fff4c2] p-3 md:col-span-2">
+            <span className="mr-1 flex min-w-[150px] items-center gap-2 text-[15px] font-semibold text-ink">
+              Semi-English medium <span className="ssc-deva text-[13px] font-medium text-ink-soft">सेमी इंग्रजी</span>
+            </span>
+            {SEMI_YEARS.map((l) => (
+              <a key={l.slug} href={`${BASE_PATH}/${l.slug}`} title={l.h1.en} className="rounded-full border-2 border-ink/15 bg-white px-2.5 py-0.5 font-mono text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white">
+                {l.scope.year}
+              </a>
+            ))}
+          </li>
+        )}
         {rows.map((r) => (
           <li key={r.key} className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink/10 bg-white p-3">
             <span className="mr-1 flex min-w-[150px] items-center gap-2 text-[15px] font-semibold text-ink">
@@ -304,6 +330,11 @@ export function YearSubjects({ year }: { year: number }) {
     <section aria-label={`Subjects in ${year}`} className="mx-auto max-w-6xl px-4 pb-12">
       <p className="label mb-2">SSC {year} papers by subject</p>
       <div className="flex flex-wrap gap-2">
+        {SEMI_YEARS.some((l) => l.scope.year === year) && (
+          <a href={`${BASE_PATH}/ssc-semi-english-question-paper-${year}`} className="rounded-full border-2 border-ink bg-[#fff4c2] px-2.5 py-0.5 text-[13px] font-semibold text-ink hover:bg-ink hover:text-white">
+            Semi-English medium {year}
+          </a>
+        )}
         {rows.map((r) => (
           <a
             key={r.key}
@@ -348,6 +379,11 @@ export function RelatedLinks({ subject, year }: { subject: string; year: number 
           <a href={`${BASE_PATH}/ssc-board-paper-${year}`} className={chip}>
             All {year} papers
           </a>
+          {SEMI_YEARS.some((l) => l.scope.year === year) && (
+            <a href={`${BASE_PATH}/ssc-semi-english-question-paper-${year}`} className={chip}>
+              Semi-English {year}
+            </a>
+          )}
         </div>
       </div>
     </section>

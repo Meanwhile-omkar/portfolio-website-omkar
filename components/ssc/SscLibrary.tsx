@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLenis } from "lenis/react";
 import { Tape } from "@/components/sketch/Paper";
-import { ALL, BASE_PATH, PAPERS_REPO, fileHref, paperName, type Paper, type Scope } from "./data";
+import { ALL, BASE_PATH, PAPERS_REPO, SEMI, fileHref, inMedium, paperName, type Paper, type Scope } from "./data";
 import { MEDIUMS, SUBJECTS, T, examLabel, variantLabel, type Lang } from "./i18n";
 import TalkToMe from "./TalkToMe";
 
@@ -28,8 +28,16 @@ const bySubject = (a: Paper, b: Paper) =>
 type Sub = { id: string; title: string; papers: Paper[] };
 type Folder = { id: string; kind: FKind; title: string; subs: Sub[]; count: number };
 
-function byMedium(list: Paper[], idp: string, lang: Lang): Sub[] {
+function byMedium(list: Paper[], idp: string, lang: Lang, semiOnly: boolean): Sub[] {
   const subs: Sub[] = [];
+  // Only Semi-English picked: one folder with its English maths/science and Marathi history/geography papers.
+  if (semiOnly) {
+    const ps = list.filter((p) => p.medium);
+    if (ps.length) subs.push({ id: `${idp}-semi-english`, title: MEDIUMS.find((x) => x.key === SEMI)![lang], papers: ps.sort(bySubject) });
+    const langs = list.filter((p) => !p.medium);
+    if (langs.length) subs.push({ id: `${idp}-languages`, title: T[lang].languageH, papers: langs.sort(bySubject) });
+    return subs;
+  }
   const meds = [...new Set(list.filter((p) => p.medium).map((p) => p.medium as string))].sort((a, b) => MED_ORDER[a] - MED_ORDER[b]);
   for (const m of meds)
     subs.push({ id: `${idp}-${m.toLowerCase()}`, title: MEDIUMS.find((x) => x.key === m)![lang], papers: list.filter((p) => p.medium === m).sort(bySubject) });
@@ -38,17 +46,17 @@ function byMedium(list: Paper[], idp: string, lang: Lang): Sub[] {
   return subs;
 }
 
-function buildFolders(list: Paper[], lang: Lang): Folder[] {
+function buildFolders(list: Paper[], lang: Lang, semiOnly = false): Folder[] {
   const t = T[lang];
   const out: Folder[] = [];
   const yearsOf = (k: FKind) => [...new Set(list.filter((p) => fkindOf(p) === k).map((p) => p.year as number))].sort((a, b) => b - a);
   for (const y of yearsOf("board")) {
     const ps = list.filter((p) => fkindOf(p) === "board" && p.year === y);
-    out.push({ id: `board-${y}`, kind: "board", title: t.boardFolder(y), subs: byMedium(ps, `board-${y}`, lang), count: ps.length });
+    out.push({ id: `board-${y}`, kind: "board", title: t.boardFolder(y), subs: byMedium(ps, `board-${y}`, lang, semiOnly), count: ps.length });
   }
   for (const y of yearsOf("supp")) {
     const ps = list.filter((p) => fkindOf(p) === "supp" && p.year === y);
-    out.push({ id: `supp-${y}`, kind: "supp", title: t.suppFolder(examLabel(ps[0].exam ?? String(y), lang)), subs: byMedium(ps, `supp-${y}`, lang), count: ps.length });
+    out.push({ id: `supp-${y}`, kind: "supp", title: t.suppFolder(examLabel(ps[0].exam ?? String(y), lang)), subs: byMedium(ps, `supp-${y}`, lang, semiOnly), count: ps.length });
   }
   const pre = list.filter((p) => p.kind === "prelim");
   if (pre.length) {
@@ -239,7 +247,7 @@ export default function SscLibrary({
     const needle = q.trim().toLowerCase();
     return ALL.filter((p) => {
       if (kinds.length && !kinds.includes(fkindOf(p))) return false;
-      if (mediums.length && p.medium && !mediums.includes(p.medium)) return false;
+      if (mediums.length && !mediums.some((m) => inMedium(p, m))) return false;
       if (subjects.length && !subjects.includes(p.subject) && !subjects.some((s) => BUNDLE[s] === p.subject)) return false;
       if (years.length && !years.includes(String(p.year))) return false;
       if (!needle) return true;
@@ -248,7 +256,8 @@ export default function SscLibrary({
     });
   }, [kinds, mediums, subjects, years, q]);
 
-  const folders = useMemo(() => buildFolders(shown, lang), [shown, lang]);
+  const semiOnly = mediums.length === 1 && mediums[0] === SEMI;
+  const folders = useMemo(() => buildFolders(shown, lang, semiOnly), [shown, lang, semiOnly]);
   const folder = folders.find((f) => f.id === path[0]);
   const sub = folder && (folder.subs.length === 1 ? folder.subs[0] : folder.subs.find((s) => s.id === path[1]));
   const inView = sub ? sub.papers : folder ? folder.subs.flatMap((s) => s.papers) : shown;
@@ -330,6 +339,11 @@ export default function SscLibrary({
         </h1>
         <p className="mt-5 max-w-2xl text-[17px] leading-relaxed md:text-[19px]">{heading ? heading.intro[lang] : t.intro}</p>
         {lead}
+        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-medium text-ink" aria-label="Why this site">
+          {t.trust.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
         {!heading && (
           <div className="mt-6 flex flex-wrap gap-3">
             {t.stats(counts.board, counts.years, counts.practice).map((s, i) => (

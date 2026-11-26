@@ -22,6 +22,8 @@ export type SubjectKey = (typeof SUBJECTS)[number]["key"];
 
 export const MEDIUMS = [
   { key: "English", en: "English medium", mr: "इंग्रजी माध्यम" },
+  // Not a separate board paper: see inMedium() in data.ts.
+  { key: "SemiEnglish", en: "Semi-English medium", mr: "सेमी इंग्रजी माध्यम" },
   { key: "Marathi", en: "Marathi medium", mr: "मराठी माध्यम" },
   { key: "Hindi", en: "Hindi medium", mr: "हिंदी माध्यम" },
   { key: "Urdu", en: "Urdu medium", mr: "उर्दू माध्यम" },
@@ -59,12 +61,13 @@ export function examLabel(exam: string, lang: Lang) {
 
 export const T = {
   en: {
-    kicker: "Maharashtra State Board · Class 10 · Previous year question papers",
+    kicker: "Maharashtra State Board · Class 10 · Official board papers",
     title: "SSC board papers,",
     titleHl: "all in one place.",
     intro:
-      "Maharashtra SSC previous year question papers (PYQ) from 2019 to 2026, in English and Marathi medium, plus school prelims and the official SCERT question bank. Free PDF download, no login. I checked every paper's code and date by hand.",
-    stats: (b: number, y: number, p: number) => [`${b} board papers`, `${y} years`, `${p} practice papers`],
+      "Official Maharashtra SSC board question papers (PYQ) from 2019 to 2026, the real papers students wrote, in English, Semi-English and Marathi medium, plus school prelims and the official SCERT question bank. Free, no ads, no login: any paper is two taps away. I'm an SSC alumnus and run this as a free voluntary service, and every paper was checked by hand. Missing something? Ask me below.",
+    stats: (b: number, y: number, p: number) => [`${b} official board papers`, `${y} years`, `${p} practice papers`],
+    trust: ["✓ Official board papers", "✓ 100% free · no ads", "✓ No login, no sign-up", "✓ Any paper in 2 taps", "✓ Request any paper"],
     tabs: { pyq: "Board papers", prelim: "Prelims & practice", qbank: "Question banks", model: "Model papers" },
     tabHints: {
       pyq: "The actual papers from the board exam, March and supplementary.",
@@ -98,7 +101,7 @@ export const T = {
     zip: "Download everything (ZIP)",
     repo: "Browse all folders on GitHub",
     credits:
-      "Papers are published by MSBSHSE (Maharashtra State Board). Scans collected from maharashtrastudy.com, AglaSem, CareerIndia and Careers360; question banks by SCERT Maharashtra. Shared free for students.",
+      "Board papers are the official question papers published by MSBSHSE (Maharashtra State Board); scans collected from maharashtrastudy.com, AglaSem, CareerIndia and Careers360. Question banks by SCERT Maharashtra. This is a free voluntary service by an SSC alumnus, not a board website, with no ads and nothing to sell.",
     wrong: "Found a wrong or missing paper? Tell me",
     session: "Session",
     langToggle: "मराठी",
@@ -131,12 +134,13 @@ export const T = {
     faqTitle: "Questions students ask",
   },
   mr: {
-    kicker: "महाराष्ट्र राज्य मंडळ · इयत्ता १०वी",
+    kicker: "महाराष्ट्र राज्य मंडळ · इयत्ता १०वी · अधिकृत बोर्ड प्रश्नपत्रिका",
     title: "दहावी बोर्ड प्रश्नपत्रिका,",
     titleHl: "एकाच ठिकाणी.",
     intro:
-      "२०१९ ते २०२६ मधील बोर्ड परीक्षेच्या खऱ्या प्रश्नपत्रिका, शाळांच्या सराव परीक्षा आणि SCERT ची अधिकृत प्रश्नपेढी. उघडणे व डाउनलोड करणे मोफत. प्रत्येक प्रश्नपत्रिकेचा कोड व तारीख मी स्वतः तपासली आहे.",
-    stats: (b: number, y: number, p: number) => [`${b} बोर्ड प्रश्नपत्रिका`, `${y} वर्षे`, `${p} सराव प्रश्नपत्रिका`],
+      "२०१९ ते २०२६ मधील अधिकृत एसएससी बोर्ड प्रश्नपत्रिका, विद्यार्थ्यांनी प्रत्यक्ष सोडवलेल्या, इंग्रजी, सेमी इंग्रजी व मराठी माध्यमात. सोबत शाळांच्या सराव परीक्षा आणि SCERT ची अधिकृत प्रश्नपेढी. पूर्णपणे मोफत, जाहिराती नाहीत, लॉगिन नाही: कोणतीही प्रश्नपत्रिका दोन टॅपमध्ये. मी एसएससीचा माजी विद्यार्थी असून ही मोफत स्वयंसेवी सेवा चालवतो. काही हवे असल्यास खाली विचारा.",
+    stats: (b: number, y: number, p: number) => [`${b} अधिकृत बोर्ड प्रश्नपत्रिका`, `${y} वर्षे`, `${p} सराव प्रश्नपत्रिका`],
+    trust: ["✓ अधिकृत बोर्ड प्रश्नपत्रिका", "✓ पूर्णपणे मोफत · जाहिराती नाहीत", "✓ लॉगिन नाही", "✓ दोन टॅपमध्ये प्रश्नपत्रिका", "✓ हवी ती प्रश्नपत्रिका मागा"],
     tabs: { pyq: "बोर्ड प्रश्नपत्रिका", prelim: "सराव / पूर्व परीक्षा", qbank: "प्रश्नपेढी", model: "नमुना प्रश्नपत्रिका" },
     tabHints: {
       pyq: "बोर्ड परीक्षेतील खऱ्या प्रश्नपत्रिका, मार्च आणि पुरवणी परीक्षा.",
@@ -170,7 +174,7 @@ export const T = {
     zip: "सर्व एकत्र डाउनलोड करा (ZIP)",
     repo: "GitHub वर सर्व फोल्डर पहा",
     credits:
-      "प्रश्नपत्रिका MSBSHSE (महाराष्ट्र राज्य मंडळ) यांनी प्रकाशित केल्या आहेत. स्कॅन maharashtrastudy.com, AglaSem, CareerIndia व Careers360 वरून गोळा केले; प्रश्नपेढी SCERT महाराष्ट्र यांची. विद्यार्थ्यांसाठी मोफत.",
+      "बोर्ड प्रश्नपत्रिका MSBSHSE (महाराष्ट्र राज्य मंडळ) यांनी प्रकाशित केलेल्या अधिकृत प्रश्नपत्रिका आहेत; स्कॅन maharashtrastudy.com, AglaSem, CareerIndia व Careers360 वरून गोळा केले. प्रश्नपेढी SCERT महाराष्ट्र यांची. ही एका माजी विद्यार्थ्याची मोफत स्वयंसेवी सेवा आहे, बोर्डाची वेबसाइट नाही; जाहिराती नाहीत, काहीही विकायचे नाही.",
     wrong: "चुकीची किंवा नसलेली प्रश्नपत्रिका दिसली? मला सांगा",
     session: "सत्र",
     langToggle: "English",

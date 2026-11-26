@@ -4,11 +4,12 @@
 
 ## SSC Board Papers · Maharashtra
 
-Free PDFs of real Maharashtra State Board (MSBSHSE) SSC / Class 10 board question papers, checked against the paper code and exam date printed on each paper. No login.
+Official Maharashtra State Board (MSBSHSE) SSC / Class 10 board question papers: the real papers students wrote in each exam, scanned and checked against the paper code and exam date printed on each one. Completely free: no ads, no pop-ups, no login or sign-up, and any paper is about two taps away (whole folders download as one ZIP). Students can request missing papers through the form on the page. It is run as a free voluntary service by an SSC alumnus; it is not the board's own website.
 
 - Board papers: March 2019–2026, plus supplementary exams (June-July, August, September). The March 2021 exam was cancelled due to COVID; the September 2021 papers for Algebra, Geometry, Science 1 and Science 2 are included.
 - Subjects: Algebra (Maths 1), Geometry (Maths 2), Science 1, Science 2, History and Political Science, Geography, Marathi, Hindi, English, Sanskrit, Urdu, Arabic, German.
 - Mediums: English and Marathi medium for all main subjects (2022–2026), plus Hindi, Urdu and Kannada medium where the board printed them. Language papers are the same for every medium.
+- Semi-English medium: the board prints no separate Semi-English paper. Semi-English students write Maths and Science in English and History-Geography in Marathi; the site groups exactly those official papers (English medium Algebra, Geometry, Science 1 and 2; Marathi medium History and Geography; plus language papers) under a Semi-English filter and pages.
 - Also: school prelim papers (2024-25, 2025-26), SCERT Maharashtra question banks (2022, 2023), model papers.
 - Paper pattern: language papers 80 marks, 3 hours (composite papers 40 marks, 2 hours); Maths 1 and 2, Science 1 and 2, History and Geography 40 marks, 2 hours each.
 
@@ -21,6 +22,8 @@ Free PDFs of real Maharashtra State Board (MSBSHSE) SSC / Class 10 board questio
 - [SSC English question paper 2025](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-english-question-paper-2025)
 - [SSC Algebra question paper 2025](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-algebra-question-paper-2025)
 - [Marathi medium papers](https://omkarharyan.paperkitelabs.com/ssc-board-papers/marathi-medium-question-papers)
+- [Semi-English medium papers](https://omkarharyan.paperkitelabs.com/ssc-board-papers/semi-english-medium-question-papers)
+- [Semi-English medium papers 2025](https://omkarharyan.paperkitelabs.com/ssc-board-papers/ssc-semi-english-question-paper-2025)
 - [SSC prelim papers](https://omkarharyan.paperkitelabs.com/ssc-board-papers/prelim-question-papers)
 - [SCERT Maharashtra question bank](https://omkarharyan.paperkitelabs.com/ssc-board-papers/question-bank)
 - [Sitemap](https://omkarharyan.paperkitelabs.com/sitemap.xml)
