@@ -6,6 +6,7 @@ import { Tape } from "@/components/sketch/Paper";
 import { ALL, BASE_PATH, PAPERS_REPO, SEMI, fileHref, inMedium, paperName, type Paper, type Scope } from "./data";
 import { MEDIUMS, SUBJECTS, T, examLabel, variantLabel, type Lang } from "./i18n";
 import TalkToMe from "./TalkToMe";
+import { track } from "./track";
 
 // Folder types, in listing order: board papers by year, supplementary, prelims, model papers, question banks.
 type FKind = "board" | "supp" | "prelim" | "model" | "qbank";
@@ -218,6 +219,7 @@ export default function SscLibrary({
   const go = useCallback(
     (next: string[]) => {
       setPath(next);
+      track(next.length ? "open_folder" : "back_to_all_folders", { folder: next.join("/") || undefined });
       history.pushState(null, "", urlFor(next));
       const el = document.getElementById("library");
       if (el) {
@@ -230,6 +232,7 @@ export default function SscLibrary({
   // Share this exact view: the phone's share sheet when there is one, otherwise copy the link.
   async function share() {
     const url = location.href;
+    track("share_view");
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ title: document.title, url });
@@ -257,6 +260,27 @@ export default function SscLibrary({
   }, [kinds, mediums, subjects, years, q]);
 
   const semiOnly = mediums.length === 1 && mediums[0] === SEMI;
+
+  // Behaviour signals for Clarity: what students filter by, what they search, and when they hit a dead end.
+  const filterKey = [kinds, mediums, subjects, years].map((x) => x.join(",")).join("|");
+  const [lastFilters, setLastFilters] = useState<string | null>(null);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (lastFilters !== null && lastFilters !== filterKey)
+      track("filters_changed", { f_type: kinds.join(","), f_medium: mediums.join(","), f_subject: subjects.join(","), f_year: years.join(",") });
+    setLastFilters(filterKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, filterKey]);
+  useEffect(() => {
+    if (!hydrated || !q.trim()) return;
+    const id = setTimeout(() => track("search", { search_text: q.trim().slice(0, 60) }), 1500);
+    return () => clearTimeout(id);
+  }, [q, hydrated]);
+  const noResults = hydrated && shown.length === 0;
+  useEffect(() => {
+    if (noResults) track("no_results", { search_text: q.trim().slice(0, 60) || undefined, f_medium: mediums.join(","), f_subject: subjects.join(","), f_year: years.join(",") });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noResults]);
   const folders = useMemo(() => buildFolders(shown, lang, semiOnly), [shown, lang, semiOnly]);
   const folder = folders.find((f) => f.id === path[0]);
   const sub = folder && (folder.subs.length === 1 ? folder.subs[0] : folder.subs.find((s) => s.id === path[1]));
@@ -275,6 +299,7 @@ export default function SscLibrary({
   // ZIP of whatever is in view (open folder, or everything matching the filters), keeping the folder layout.
   async function downloadZip(list: Paper[]) {
     if (!list.length || zip) return;
+    track("zip_download", { zip_count: list.length });
     if (list.length > 40 && !confirm(t.zipBig(list.length))) return;
     const { default: JSZip } = await import("jszip");
     const z = new JSZip();
@@ -317,7 +342,10 @@ export default function SscLibrary({
         </a>
         <button
           type="button"
-          onClick={() => setLang(mr ? "en" : "mr")}
+          onClick={() => {
+            setLang(mr ? "en" : "mr");
+            track("language_switch", { lang: mr ? "en" : "mr" });
+          }}
           className="flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 p-1 text-[14px] shadow-paper backdrop-blur"
           aria-label={mr ? "Switch to English" : "मराठीत पहा"}
         >

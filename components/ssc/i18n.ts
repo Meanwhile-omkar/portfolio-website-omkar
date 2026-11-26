@@ -101,7 +101,7 @@ export const T = {
     zip: "Download everything (ZIP)",
     repo: "Browse all folders on GitHub",
     credits:
-      "Board papers are the official question papers published by MSBSHSE (Maharashtra State Board); scans collected from maharashtrastudy.com, AglaSem, CareerIndia and Careers360. Question banks by SCERT Maharashtra. This is a free voluntary service by an SSC alumnus, not a board website, with no ads and nothing to sell.",
+      "Board papers are the official question papers published by MSBSHSE (Maharashtra State Board); scans collected from maharashtrastudy.com, AglaSem, CareerIndia and Careers360. Question banks by SCERT Maharashtra. This is a free voluntary service by an SSC alumnus, not a board website, with no ads and nothing to sell. Anonymous usage is measured with Microsoft Clarity to make the page easier to use; what you type in the form is never recorded.",
     wrong: "Found a wrong or missing paper? Tell me",
     session: "Session",
     langToggle: "मराठी",
@@ -174,7 +174,7 @@ export const T = {
     zip: "सर्व एकत्र डाउनलोड करा (ZIP)",
     repo: "GitHub वर सर्व फोल्डर पहा",
     credits:
-      "बोर्ड प्रश्नपत्रिका MSBSHSE (महाराष्ट्र राज्य मंडळ) यांनी प्रकाशित केलेल्या अधिकृत प्रश्नपत्रिका आहेत; स्कॅन maharashtrastudy.com, AglaSem, CareerIndia व Careers360 वरून गोळा केले. प्रश्नपेढी SCERT महाराष्ट्र यांची. ही एका माजी विद्यार्थ्याची मोफत स्वयंसेवी सेवा आहे, बोर्डाची वेबसाइट नाही; जाहिराती नाहीत, काहीही विकायचे नाही.",
+      "बोर्ड प्रश्नपत्रिका MSBSHSE (महाराष्ट्र राज्य मंडळ) यांनी प्रकाशित केलेल्या अधिकृत प्रश्नपत्रिका आहेत; स्कॅन maharashtrastudy.com, AglaSem, CareerIndia व Careers360 वरून गोळा केले. प्रश्नपेढी SCERT महाराष्ट्र यांची. ही एका माजी विद्यार्थ्याची मोफत स्वयंसेवी सेवा आहे, बोर्डाची वेबसाइट नाही; जाहिराती नाहीत, काहीही विकायचे नाही. पान वापरायला सोपे करण्यासाठी Microsoft Clarity द्वारे निनावी वापर मोजला जातो; फॉर्ममध्ये तुम्ही लिहिलेले कधीही रेकॉर्ड होत नाही.",
     wrong: "चुकीची किंवा नसलेली प्रश्नपत्रिका दिसली? मला सांगा",
     session: "सत्र",
     langToggle: "English",

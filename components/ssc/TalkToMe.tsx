@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Tape } from "@/components/sketch/Paper";
 import type { Lang } from "./i18n";
+import { track } from "./track";
 
 // Messages go to Omkar's inbox through FormSubmit (formsubmit.co): no backend or API key needed.
 // A Gmail or WhatsApp number is required for anything except a plain thank-you, so there is a way to reply.
@@ -100,6 +101,7 @@ export default function TalkToMe({ lang, email }: { lang: Lang; email: string })
     const kind = reach.trim() ? contactKind(reach) : null;
     if ((needReach && !kind) || (reach.trim() && !kind)) {
       setReachErr(true);
+      track("form_contact_missing", { form_topic: topic });
       document.getElementById("talk-reach")?.focus();
       return;
     }
@@ -126,7 +128,9 @@ export default function TalkToMe({ lang, email }: { lang: Lang; email: string })
         }),
       });
       const data = await res.json().catch(() => ({}));
-      setState(res.ok && String(data.success) !== "false" ? "ok" : "fail");
+      const ok = res.ok && String(data.success) !== "false";
+      setState(ok ? "ok" : "fail");
+      track(ok ? "form_sent" : "form_failed", { form_topic: topic, found_via: found || undefined });
     } catch {
       setState("fail");
     }
@@ -157,7 +161,7 @@ export default function TalkToMe({ lang, email }: { lang: Lang; email: string })
             <p className="font-note text-[20px] text-ink">{reach.trim() ? w.okReply : w.ok}</p>
           </div>
         ) : (
-          <form onSubmit={submit} noValidate className="grid gap-3">
+          <form onSubmit={submit} noValidate className="grid gap-3" data-clarity-mask="true">
             <fieldset>
               <legend className="label mb-2">{w.about}</legend>
               <div className="flex flex-wrap gap-2">
