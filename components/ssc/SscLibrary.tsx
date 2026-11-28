@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { Tape } from "@/components/sketch/Paper";
 import { ALL, PAPERS_REPO, SEMI, fileHref, inMedium, langBase, paperName, type Paper, type Scope } from "./data";
@@ -83,6 +83,28 @@ function buildFolders(list: Paper[], lang: Lang, semiOnly = false): Folder[] {
         .map((y) => ({ id: `question-bank-${y}`, title: t.qbYear(y), papers: qb.filter((p) => p.year === y).sort(bySubject) })),
     });
   return out;
+}
+
+// Heading for the current filters, e.g. "SSC Maths 1 · Algebra Board Papers 2025 · Marathi medium".
+const KIND_TITLE: Record<Lang, Record<string, string>> = {
+  en: { board: "Board Papers", supp: "Supplementary Papers", prelim: "Prelim Papers", model: "Model Papers", qbank: "Question Bank" },
+  mr: { board: "बोर्ड प्रश्नपत्रिका", supp: "पुरवणी परीक्षा प्रश्नपत्रिका", prelim: "सराव प्रश्नपत्रिका", model: "नमुना प्रश्नपत्रिका", qbank: "प्रश्नपेढी" },
+};
+function viewTitle(v: { kinds: string[]; mediums: string[]; subjects: string[]; years: string[]; q: string }, lang: Lang) {
+  const mr = lang === "mr";
+  const list = (xs: string[]) => (xs.length > 3 ? `${xs.slice(0, 3).join(", ")} +${xs.length - 3}` : xs.join(mr ? " व " : " & "));
+  const subj = list(v.subjects.map((s) => SUBJ[s]?.[lang] ?? s));
+  const pyqOnly = v.kinds.length && v.kinds.every((k) => k === "board" || k === "supp");
+  const kind = !v.kinds.length
+    ? mr ? "प्रश्नपत्रिका" : "Question Papers"
+    : pyqOnly && v.kinds.length === 2
+      ? KIND_TITLE[lang].board
+      : list(v.kinds.map((k) => KIND_TITLE[lang][k] ?? k));
+  const ys = [...v.years].map(Number).sort((a, b) => b - a);
+  const yrs = ys.length > 3 ? `${ys[ys.length - 1]}–${ys[0]}` : ys.join(", ");
+  const med = list(v.mediums.map((m) => MEDIUMS.find((x) => x.key === m)?.[lang] ?? m));
+  const base = `${mr ? "दहावी" : "SSC"} ${subj ? `${subj} ` : ""}${kind}${yrs ? ` ${yrs}` : ""}`;
+  return [base, med, v.q.trim() ? `“${v.q.trim()}”` : ""].filter(Boolean).join(" · ");
 }
 
 const toggle = (set: string[], v: string) => (set.includes(v) ? set.filter((x) => x !== v) : [...set, v]);
@@ -288,6 +310,20 @@ export default function SscLibrary({
 
   const yearOptions = useMemo(() => [...new Set(ALL.map((p) => p.year).filter(Boolean) as number[])].sort((a, b) => b - a), []);
   const filtered = kinds.length + mediums.length + subjects.length + years.length + (q ? 1 : 0) > 0;
+  // Does the view still match what this page is about? If not, the heading follows the filters instead.
+  const atDefaults =
+    same(kinds, defaults.kinds) && same(mediums, defaults.mediums) && same(subjects, defaults.subjects) && same(years, defaults.years) && !q.trim();
+  const custom = !atDefaults && (filtered || scoped);
+  const customTitle = custom ? viewTitle({ kinds, mediums, subjects, years, q }, lang) : "";
+  const baseTitle = useRef<string | null>(null);
+  useEffect(() => {
+    if (baseTitle.current === null) baseTitle.current = document.title; // the page's own title, from its metadata
+    const next = custom ? `${customTitle} – ${mr ? "दहावी बोर्ड प्रश्नपत्रिका" : "SSC Board Papers"}` : baseTitle.current;
+    document.title = next;
+    // Next.js re-applies the metadata <title> right after load; set ours again once that has happened.
+    const id = setTimeout(() => (document.title = next), 400);
+    return () => clearTimeout(id);
+  }, [custom, customTitle, mr]);
   const reset = () => {
     setKinds([]);
     setMediums([]);
@@ -364,7 +400,9 @@ export default function SscLibrary({
       <section className="relative mx-auto max-w-6xl px-4 pb-6 pt-10 md:pt-16" id="top">
         <p className="label">{heading?.kicker?.[lang] ?? t.kicker}</p>
         <h1 className="ssc-title mt-3 max-w-4xl text-[44px] font-semibold leading-[1.02] tracking-tight text-ink md:text-[76px]">
-          {heading ? (
+          {custom ? (
+            <span className="hl">{customTitle}</span>
+          ) : heading ? (
             <span className="hl">{heading.h1[lang]}</span>
           ) : (
             <>
@@ -372,8 +410,10 @@ export default function SscLibrary({
             </>
           )}
         </h1>
-        <p className="mt-5 max-w-2xl text-[17px] leading-relaxed md:text-[19px]">{heading ? heading.intro[lang] : t.intro}</p>
-        {lead}
+        <p className="mt-5 max-w-2xl text-[17px] leading-relaxed md:text-[19px]" aria-live="polite">
+          {custom ? t.showing(shown.length) : heading ? heading.intro[lang] : t.intro}
+        </p>
+        {!custom && lead}
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-medium text-ink" aria-label="Why this site">
           {t.trust.map((x) => (
             <li key={x}>{x}</li>
