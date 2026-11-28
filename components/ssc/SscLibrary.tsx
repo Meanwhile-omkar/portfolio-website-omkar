@@ -120,6 +120,58 @@ function filtersFromFolder(f: string, v: View) {
   if (qy) v.years = [qy[1]];
 }
 
+// ---- Search ----
+// Students type things like "2026 all subject paper", "maths 1 , 2026", "marathi, english" or
+// "history question paper 25/26/27". Words can come in any order, filler words are ignored, years can be
+// short (25 = 2025), and commas mean "or": "marathi, english" finds both.
+const STOP = new Set(
+  "all subject subjects sub paper papers question questions que ques board exam exams ssc pdf the and or of for in to with 10th 10 class std standard maharashtra state year yr previous pyq download free sab सर्व विषय सब्जेक्ट प्रश्नपत्रिका प्रश्नपत्रिकांची पेपर बोर्ड परीक्षा दहावी".split(" "),
+);
+const PHRASES: [RegExp, string][] = [
+  [/\bmaths?\s*[-.]?\s*(1|i|one)\b|\bm1\b|गणित\s*(भाग)?\s*(१|1)/g, " algebra "],
+  [/\bmaths?\s*[-.]?\s*(2|ii|two)\b|\bm2\b|गणित\s*(भाग)?\s*(२|2)/g, " geometry "],
+  [/\bsci(ence)?\s*[-.]?\s*(1|i|one)\b|विज्ञान\s*(भाग)?\s*(१|1)/g, " science1 "],
+  [/\bsci(ence)?\s*[-.]?\s*(2|ii|two)\b|विज्ञान\s*(भाग)?\s*(२|2)/g, " science2 "],
+  [/\bsemi\s*[- ]?\s*english\b/g, " semienglish "],
+];
+type Query = { years: Set<number>; groups: string[][] };
+function parseQuery(raw: string): Query | null {
+  let s = raw.toLowerCase().replace(/[|/\;.]+/g, " ");
+  for (const [re, to] of PHRASES) s = s.replace(re, to);
+  const years = new Set<number>();
+  const groups = s
+    .split(",")
+    .map((part) =>
+      part
+        .split(/[\s'"()\-–:]+/)
+        .map((w) => w.trim())
+        .filter(Boolean)
+        .filter((w) => {
+          if (/^(19|20)\d{2}$/.test(w)) return !years.add(Number(w)) && false;
+          if (/^\d{2}$/.test(w) && Number(w) >= 19 && Number(w) <= 27) return !years.add(2000 + Number(w)) && false;
+          if (/^\d+$/.test(w)) return false; // marks like "80" or stray numbers
+          return !STOP.has(w) && w.length > 1;
+        }),
+    )
+    .filter((g) => g.length);
+  return years.size || groups.length ? { years, groups } : null;
+}
+function haystack(p: Paper) {
+  const s = SUBJ[p.subject];
+  const med = p.medium ? MEDIUMS.find((m) => m.key === p.medium) : undefined;
+  const extra = p.subject === "history" ? "politics political civics" : p.subject === "algebra" || p.subject === "geometry" ? "maths math ganit" : "";
+  return [p.title, p.exam, p.code, p.subject, p.medium, med?.en, med?.mr, p.variant, s?.en, s?.mr, extra, p.kind === "qbank" ? "question bank prashnapedhi" : "", p.kind === "prelim" ? "prelim practice sarav" : "", p.kind === "model" ? "model sample namuna" : ""]
+    .join(" ")
+    .toLowerCase();
+}
+function matchesQuery(p: Paper, q: Query) {
+  if (q.years.size && !q.years.has(p.year ?? 0)) return false;
+  if (!q.groups.length) return true;
+  const h = haystack(p);
+  // Semi-English is not a printed medium: match it the same way the medium filter does.
+  return q.groups.some((g) => g.every((w) => (w === "semienglish" ? inMedium(p, SEMI) : h.includes(w))));
+}
+
 // Heading for the current filters, e.g. "SSC Maths 1 · Algebra Board Papers 2025 · Marathi medium".
 const KIND_TITLE: Record<Lang, Record<string, string>> = {
   en: { board: "Board Papers", supp: "Supplementary Papers", prelim: "Prelim Papers", model: "Model Papers", qbank: "Question Bank" },
@@ -264,7 +316,8 @@ export default function SscLibrary({
     };
     read();
     // Most visits come from shared links that already carry filters (?medium=…&year=…): take them straight to the papers.
-    if (/[?&](type|medium|subject|year|q|f)=/.test(location.search) || location.hash.startsWith("#f=")) {
+    const fromOurLinks = Boolean(heading) && /\/ssc-board-papers/.test(document.referrer) && document.referrer.includes(location.host);
+    if (/[?&](type|medium|subject|year|q|f)=/.test(location.search) || location.hash.startsWith("#f=") || fromOurLinks) {
       setTimeout(() => {
         const el = document.getElementById("papers");
         if (!el || el.getBoundingClientRect().top < innerHeight * 0.6) return;
@@ -318,15 +371,15 @@ export default function SscLibrary({
   }
 
   const shown = useMemo(() => {
-    const needle = q.trim().toLowerCase();
+    const query = parseQuery(q);
     return ALL.filter((p) => {
       if (kinds.length && !kinds.includes(fkindOf(p))) return false;
       if (mediums.length && !mediums.some((m) => inMedium(p, m))) return false;
       if (subjects.length && !subjects.includes(p.subject) && !subjects.some((s) => BUNDLE[s] === p.subject)) return false;
       if (years.length && !years.includes(String(p.year))) return false;
-      if (!needle) return true;
+      if (!query) return true;
       const s = SUBJ[p.subject];
-      return [p.title, p.exam, p.code, p.medium, p.variant, s?.en, s?.mr, String(p.year)].join(" ").toLowerCase().includes(needle);
+      return matchesQuery(p, query);
     });
   }, [kinds, mediums, subjects, years, q]);
 
