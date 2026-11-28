@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLenis } from "lenis/react";
 import { Tape } from "@/components/sketch/Paper";
-import { ALL, BASE_PATH, PAPERS_REPO, SEMI, fileHref, inMedium, paperName, type Paper, type Scope } from "./data";
+import { ALL, PAPERS_REPO, SEMI, fileHref, inMedium, langBase, paperName, type Paper, type Scope } from "./data";
 import { MEDIUMS, SUBJECTS, T, examLabel, variantLabel, type Lang } from "./i18n";
 import TalkToMe from "./TalkToMe";
 import { track } from "./track";
@@ -21,7 +21,6 @@ const MED_ORDER = Object.fromEntries(MEDIUMS.map((m, i) => [m.key, i]));
 const FILTER_SUBJECTS = SUBJECTS.filter((s) => s.key !== "maths" && s.key !== "science");
 const BUNDLE: Record<string, string> = { algebra: "maths", geometry: "maths", science1: "science", science2: "science" };
 const COLOR: Record<FKind, string> = { board: "#ffc700", supp: "#ef5533", prelim: "#18a0fb", model: "#ee46d3", qbank: "#1bc47d" };
-const STORE = "ssc-papers-prefs";
 
 const bySubject = (a: Paper, b: Paper) =>
   (SUBJ_ORDER[a.subject] ?? 99) - (SUBJ_ORDER[b.subject] ?? 99) || (a.variant ?? "").localeCompare(b.variant ?? "") || a.title.localeCompare(b.title);
@@ -149,16 +148,21 @@ export default function SscLibrary({
   scope = {},
   heading,
   lead,
+  lang,
+  altHref,
 }: {
   email: string;
   scope?: Scope;
   lead?: React.ReactNode;
+  /** Page language; English and Marathi are separate URLs (/ssc-board-papers/… and /ssc-board-papers/mr/…). */
+  lang: Lang;
+  /** The same page in the other language. */
+  altHref: string;
   heading?: { kicker?: { en: string; mr: string }; h1: { en: string; mr: string }; intro: { en: string; mr: string } };
 }) {
   // What this page starts with (landing pages are pre-filtered). The URL only stores differences from it.
   const scopeKey = JSON.stringify(scope);
   const defaults = useMemo(() => defaultView(JSON.parse(scopeKey) as Scope), [scopeKey]);
-  const [lang, setLang] = useState<Lang>("en");
   const [kinds, setKinds] = useState<string[]>(defaults.kinds);
   const [mediums, setMediums] = useState<string[]>(defaults.mediums);
   const [subjects, setSubjects] = useState<string[]>(defaults.subjects);
@@ -175,17 +179,8 @@ export default function SscLibrary({
   const scoped = Boolean(heading);
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(STORE) ?? "{}");
-      if (s.lang === "mr" || s.lang === "en") setLang(s.lang);
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORE, JSON.stringify({ lang }));
-    } catch {}
     document.documentElement.lang = mr ? "mr" : "en";
-  }, [lang, mr]);
+  }, [mr]);
 
   // Filters, search and the open folder all live in the URL (?type=…&medium=…&f=…), so any view can be
   // copied and shared, and the phone's back button closes a folder.
@@ -344,23 +339,26 @@ export default function SscLibrary({
     <div className={mr ? "ssc-mr" : ""}>
       <header className="sticky top-3 z-40 mx-auto flex max-w-6xl items-center justify-between gap-2 px-4">
         <a
-          href={scoped ? BASE_PATH : "/"}
+          href={scoped ? langBase(lang) : "/"}
           className="rounded-full border border-ink/10 bg-white/85 px-4 py-1.5 font-marker text-[26px] leading-none text-ink shadow-paper backdrop-blur"
         >
           {scoped ? (mr ? "← सर्व प्रश्नपत्रिका" : "← all papers") : "← omkar."}
         </a>
-        <button
-          type="button"
-          onClick={() => {
-            setLang(mr ? "en" : "mr");
+        {/* A real link to the other-language page (Google follows it); filters and open folder carry over. */}
+        <a
+          href={altHref}
+          hrefLang={mr ? "en-IN" : "mr-IN"}
+          onClick={(e) => {
+            e.preventDefault();
             track("language_switch", { lang: mr ? "en" : "mr" });
+            location.href = altHref + location.search + location.hash;
           }}
           className="flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 p-1 text-[14px] shadow-paper backdrop-blur"
           aria-label={mr ? "Switch to English" : "मराठीत पहा"}
         >
           <span className={`rounded-full px-3 py-1 ${!mr ? "bg-ink text-white" : "text-ink-soft"}`}>EN</span>
           <span className={`ssc-deva rounded-full px-3 py-1 ${mr ? "bg-ink text-white" : "text-ink-soft"}`}>मराठी</span>
-        </button>
+        </a>
       </header>
 
       <section className="relative mx-auto max-w-6xl px-4 pb-6 pt-10 md:pt-16" id="top">

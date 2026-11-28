@@ -35,10 +35,7 @@ export default function ClarityScript() {
     } catch {}
     tag("visitor", visits === 1 ? "new" : "returning");
     tag("visit_number", Math.min(visits, 20));
-    try {
-      const s = JSON.parse(localStorage.getItem("ssc-papers-prefs") ?? "{}");
-      tag("lang", s.lang === "mr" ? "mr" : "en");
-    } catch {}
+    tag("lang", /^\/ssc-board-papers\/mr(\/|$)/.test(location.pathname) ? "mr" : "en");
     track("page_view");
 
     // Paper opens/downloads and other link clicks, wherever the link is on the page.
@@ -122,7 +119,7 @@ export default function ClarityScript() {
 }
 
 function pageType(path: string) {
-  const s = path.replace(/^\/ssc-board-papers\/?/, "");
+  const s = path.replace(/^\/ssc-board-papers\/?(mr\/?)?/, "");
   if (!s) return "main";
   if (/^ssc-board-paper-\d{4}$/.test(s)) return "year";
   if (/^ssc-semi-english-question-paper-\d{4}$/.test(s)) return "semi_year";

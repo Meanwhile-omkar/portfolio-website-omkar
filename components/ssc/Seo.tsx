@@ -1,8 +1,10 @@
 // Server-rendered SEO pieces for the SSC papers pages: JSON-LD, the "browse by" link hub and the FAQ.
 import { SITE_URL } from "@/lib/site";
 import { profile } from "@/data/profile";
-import { BASE_PATH, LANDINGS, SSC_SITE_NAME, SUBJECT_YEARS, fileAbs, fileHref, paperName, subjectYearSlug, type Paper } from "./data";
-import { SUBJECTS } from "./i18n";
+import { BASE_PATH, LANDINGS, SSC_SITE_NAME, SUBJECT_YEARS, fileAbs, fileHref, landingTitle, langBase, paperName, subjectYearSlug, type Paper } from "./data";
+import { SUBJECTS, type Lang } from "./i18n";
+
+const MR_NAME: Record<string, string> = Object.fromEntries(SUBJECTS.map((s) => [s.key, s.mr]));
 
 const SEMI_YEARS = LANDINGS.filter((l) => l.group === "mediumYear");
 
@@ -64,6 +66,7 @@ export function JsonLd({
   papers,
   crumbs,
   withFaq,
+  lang = "en",
 }: {
   path: string;
   name: string;
@@ -71,6 +74,7 @@ export function JsonLd({
   papers: Paper[];
   crumbs: { name: string; path: string }[];
   withFaq?: boolean;
+  lang?: Lang;
 }) {
   const url = SITE_URL + path;
   const graph: Record<string, unknown>[] = [
@@ -81,7 +85,7 @@ export function JsonLd({
       url,
       name,
       description,
-      inLanguage: ["en-IN", "mr-IN"],
+      inLanguage: lang === "mr" ? "mr-IN" : "en-IN",
       isPartOf: { "@type": "WebSite", "@id": `${SITE_URL}${BASE_PATH}#site`, url: SITE_URL + BASE_PATH, name: SSC_SITE_NAME },
       author: { "@type": "Person", name: profile.name, url: SITE_URL },
       about: { "@type": "Thing", name: "Maharashtra SSC (Class 10) board examination" },
@@ -129,7 +133,7 @@ export function JsonLd({
 }
 
 // Internal links to every landing page. Helps students and search engines find the year/subject pages.
-export function BrowseHub({ current }: { current?: string }) {
+export function BrowseHub({ current, lang = "en" }: { current?: string; lang?: Lang }) {
   const groups: [string, string, typeof LANDINGS][] = [
     ["By year", "वर्षानुसार", LANDINGS.filter((l) => l.group === "year")],
     ["By subject", "विषयानुसार", LANDINGS.filter((l) => l.group === "subject")],
@@ -149,7 +153,7 @@ export function BrowseHub({ current }: { current?: string }) {
             <ul className="mt-3 grid gap-1.5">
               {current && (
                 <li>
-                  <a href={BASE_PATH} className="text-[15px] text-blue underline-offset-4 hover:underline">
+                  <a href={langBase(lang)} className="text-[15px] text-blue underline-offset-4 hover:underline">
                     All SSC papers (2019–2026)
                   </a>
                 </li>
@@ -157,11 +161,11 @@ export function BrowseHub({ current }: { current?: string }) {
               {ls.map((l) => (
                 <li key={l.slug}>
                   <a
-                    href={`${BASE_PATH}/${l.slug}`}
+                    href={`${langBase(lang)}/${l.slug}`}
                     aria-current={current === l.slug ? "page" : undefined}
                     className={`text-[15px] underline-offset-4 hover:underline ${current === l.slug ? "font-semibold text-ink" : "text-blue"}`}
                   >
-                    {l.title.split(" PDF")[0].replace("Maharashtra ", "")}
+                    {landingTitle(l, lang).split(" PDF")[0].replace("Maharashtra ", "")}
                   </a>
                 </li>
               ))}
@@ -234,7 +238,7 @@ export function PaperIndex({ papers }: { papers: Paper[] }) {
 
 // "SSC English question paper 2025" style quick links: every subject with a chip per year.
 // Useful for students who know exactly what they want, and gives search engines a clear map of the pages.
-export function PaperMatrix({ subject }: { subject?: string }) {
+export function PaperMatrix({ subject, lang = "en" }: { subject?: string; lang?: Lang }) {
   const rows = subject ? SUBJECT_YEARS.filter((r) => r.key === subject) : SUBJECT_YEARS;
   const color = Object.fromEntries(SUBJECTS.map((s) => [s.key, s.color]));
   const mr = Object.fromEntries(SUBJECTS.map((s) => [s.key, s.mr]));
@@ -251,7 +255,7 @@ export function PaperMatrix({ subject }: { subject?: string }) {
               Semi-English medium <span className="ssc-deva text-[13px] font-medium text-ink-soft">सेमी इंग्रजी</span>
             </span>
             {SEMI_YEARS.map((l) => (
-              <a key={l.slug} href={`${BASE_PATH}/${l.slug}`} title={l.h1.en} className="rounded-full border-2 border-ink/15 bg-white px-2.5 py-0.5 font-mono text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white">
+              <a key={l.slug} href={`${langBase(lang)}/${l.slug}`} title={l.h1.en} className="rounded-full border-2 border-ink/15 bg-white px-2.5 py-0.5 font-mono text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white">
                 {l.scope.year}
               </a>
             ))}
@@ -267,7 +271,7 @@ export function PaperMatrix({ subject }: { subject?: string }) {
             {r.years.map((y) => (
               <a
                 key={y}
-                href={`${BASE_PATH}/${subjectYearSlug(r.key, y)}`}
+                href={`${langBase(lang)}/${subjectYearSlug(r.key, y)}`}
                 title={`SSC ${r.name} question paper ${y}`}
                 className="rounded-full border-2 border-ink/15 px-2.5 py-0.5 font-mono text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white"
               >
@@ -283,7 +287,8 @@ export function PaperMatrix({ subject }: { subject?: string }) {
 
 // Plain facts table for a subject-and-year page: every paper with code, marks, time and direct links.
 // Shown above the library so a student who searched for one paper gets it immediately.
-export function QuickPapers({ papers, heading }: { papers: Paper[]; heading: string }) {
+export function QuickPapers({ papers, heading, lang = "en" }: { papers: Paper[]; heading: string; lang?: Lang }) {
+  const mr = lang === "mr";
   const rows = [...papers].sort((a, b) => (a.session === "supplementary" ? 1 : 0) - (b.session === "supplementary" ? 1 : 0) || (a.medium ?? a.variant ?? "").localeCompare(b.medium ?? b.variant ?? ""));
   return (
     <div className="mt-7 overflow-hidden rounded-2xl border-2 border-ink bg-white shadow-[4px_4px_0_#1d1d1f]">
@@ -291,7 +296,7 @@ export function QuickPapers({ papers, heading }: { papers: Paper[]; heading: str
       <table className="w-full text-left text-[14px]">
         <thead className="text-[11px] uppercase tracking-wide text-ink-faint">
           <tr>
-            <th className="px-3 py-2 font-medium md:px-4">Paper · exam</th>
+            <th className="px-3 py-2 font-medium md:px-4">{mr ? "प्रश्नपत्रिका · परीक्षा" : "Paper · exam"}</th>
             <th className="px-3 py-2 text-right font-medium md:px-4">PDF</th>
           </tr>
         </thead>
@@ -308,10 +313,10 @@ export function QuickPapers({ papers, heading }: { papers: Paper[]; heading: str
                 </td>
                 <td className="px-3 py-2.5 text-right md:px-4">
                   <a href={fileHref(p)} target="_blank" rel="noopener" title={paperName(p)} className="block font-semibold text-blue hover:underline">
-                    View
+                    {mr ? "पहा" : "View"}
                   </a>
                   <a href={fileHref(p)} download className="mt-0.5 block font-semibold text-blue hover:underline">
-                    Download
+                    {mr ? "डाउनलोड" : "Download"}
                   </a>
                 </td>
               </tr>
@@ -324,24 +329,24 @@ export function QuickPapers({ papers, heading }: { papers: Paper[]; heading: str
 }
 
 // Subject chips for a year page.
-export function YearSubjects({ year }: { year: number }) {
+export function YearSubjects({ year, lang = "en" }: { year: number; lang?: Lang }) {
   const rows = SUBJECT_YEARS.filter((r) => r.years.includes(year));
   return (
     <section aria-label={`Subjects in ${year}`} className="mx-auto max-w-6xl px-4 pb-12">
-      <p className="label mb-2">SSC {year} papers by subject</p>
+      <p className="label mb-2">{lang === "mr" ? `${year} च्या प्रश्नपत्रिका विषयानुसार` : `SSC ${year} papers by subject`}</p>
       <div className="flex flex-wrap gap-2">
         {SEMI_YEARS.some((l) => l.scope.year === year) && (
-          <a href={`${BASE_PATH}/ssc-semi-english-question-paper-${year}`} className="rounded-full border-2 border-ink bg-[#fff4c2] px-2.5 py-0.5 text-[13px] font-semibold text-ink hover:bg-ink hover:text-white">
-            Semi-English medium {year}
+          <a href={`${langBase(lang)}/ssc-semi-english-question-paper-${year}`} className="rounded-full border-2 border-ink bg-[#fff4c2] px-2.5 py-0.5 text-[13px] font-semibold text-ink hover:bg-ink hover:text-white">
+            {lang === "mr" ? "सेमी इंग्रजी माध्यम" : "Semi-English medium"} {year}
           </a>
         )}
         {rows.map((r) => (
           <a
             key={r.key}
-            href={`${BASE_PATH}/${subjectYearSlug(r.key, year)}`}
+            href={`${langBase(lang)}/${subjectYearSlug(r.key, year)}`}
             className="rounded-full border-2 border-ink/15 px-2.5 py-0.5 text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white"
           >
-            {r.name} {year}
+            {lang === "mr" ? MR_NAME[r.key] : r.name} {year}
           </a>
         ))}
       </div>
@@ -350,38 +355,39 @@ export function YearSubjects({ year }: { year: number }) {
 }
 
 // Sideways links on a subject-and-year page: same subject in other years, other subjects in the same year.
-export function RelatedLinks({ subject, year }: { subject: string; year: number }) {
+export function RelatedLinks({ subject, year, lang = "en" }: { subject: string; year: number; lang?: Lang }) {
+  const nm = (k: string, en: string) => (lang === "mr" ? MR_NAME[k] ?? en : en);
   const same = SUBJECT_YEARS.find((r) => r.key === subject);
   const others = SUBJECT_YEARS.filter((r) => r.key !== subject && r.years.includes(year));
   const chip = "rounded-full border-2 border-ink/15 px-2.5 py-0.5 text-[13px] text-ink hover:border-ink hover:bg-ink hover:text-white";
   return (
     <section aria-label="Related papers" className="mx-auto grid max-w-6xl gap-4 px-4 pb-12 md:grid-cols-2">
       <div>
-        <p className="label mb-2">{same?.name} · other years</p>
+        <p className="label mb-2">{nm(subject, same?.name ?? "")} · {lang === "mr" ? "इतर वर्षे" : "other years"}</p>
         <div className="flex flex-wrap gap-2">
           {same?.years
             .filter((y) => y !== year)
             .map((y) => (
-              <a key={y} href={`${BASE_PATH}/${subjectYearSlug(subject, y)}`} className={chip}>
-                {same.name} {y}
+              <a key={y} href={`${langBase(lang)}/${subjectYearSlug(subject, y)}`} className={chip}>
+                {nm(subject, same.name)} {y}
               </a>
             ))}
         </div>
       </div>
       <div>
-        <p className="label mb-2">Other subjects · {year}</p>
+        <p className="label mb-2">{lang === "mr" ? "इतर विषय" : "Other subjects"} · {year}</p>
         <div className="flex flex-wrap gap-2">
           {others.map((r) => (
-            <a key={r.key} href={`${BASE_PATH}/${subjectYearSlug(r.key, year)}`} className={chip}>
-              {r.name} {year}
+            <a key={r.key} href={`${langBase(lang)}/${subjectYearSlug(r.key, year)}`} className={chip}>
+              {nm(r.key, r.name)} {year}
             </a>
           ))}
-          <a href={`${BASE_PATH}/ssc-board-paper-${year}`} className={chip}>
-            All {year} papers
+          <a href={`${langBase(lang)}/ssc-board-paper-${year}`} className={chip}>
+            {lang === "mr" ? `सर्व ${year} प्रश्नपत्रिका` : `All ${year} papers`}
           </a>
           {SEMI_YEARS.some((l) => l.scope.year === year) && (
-            <a href={`${BASE_PATH}/ssc-semi-english-question-paper-${year}`} className={chip}>
-              Semi-English {year}
+            <a href={`${langBase(lang)}/ssc-semi-english-question-paper-${year}`} className={chip}>
+              {lang === "mr" ? "सेमी इंग्रजी" : "Semi-English"} {year}
             </a>
           )}
         </div>

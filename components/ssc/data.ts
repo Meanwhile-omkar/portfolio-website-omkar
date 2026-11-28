@@ -1,7 +1,7 @@
 // Paper catalog + the landing pages built from it. Safe to import from server and client code.
 import papers from "@/data/sscPapers.json";
 import { SITE_URL } from "@/lib/site";
-import { MEDIUMS, SUBJECTS } from "./i18n";
+import { MEDIUMS, SUBJECTS, type Lang } from "./i18n";
 
 export type Paper = {
   kind: "pyq" | "prelim" | "qbank" | "model";
@@ -267,3 +267,18 @@ export const papersInScope = (s: Scope) =>
       (!s.subject || p.subject === s.subject) &&
       (!s.medium || inMedium(p, s.medium)),
   );
+
+// ---- English and Marathi versions of every page ----
+// English lives at /ssc-board-papers/…, Marathi at /ssc-board-papers/mr/…, so a shared link keeps its
+// language and Google can index (and rank) the Marathi text on its own.
+export const langBase = (lang: Lang) => (lang === "mr" ? `${BASE_PATH}/mr` : BASE_PATH);
+export const langPath = (slug: string | undefined, lang: Lang) => (slug ? `${langBase(lang)}/${slug}` : langBase(lang));
+export const landingTitle = (l: Landing, lang: Lang) => (lang === "mr" ? `${l.h1.mr} PDF – अधिकृत महाराष्ट्र बोर्ड प्रश्नपत्रिका` : l.title);
+export const landingDescription = (l: Landing, lang: Lang) =>
+  lang === "mr" ? `${l.intro.mr} अधिकृत बोर्ड प्रश्नपत्रिका, पूर्णपणे मोफत, जाहिराती नाहीत, लॉगिन नाही.` : l.description;
+// hreflang map for one page, used in page metadata and the sitemap.
+export const langAlternates = (slug?: string) => ({
+  "en-IN": langPath(slug, "en"),
+  "mr-IN": langPath(slug, "mr"),
+  "x-default": langPath(slug, "en"),
+});

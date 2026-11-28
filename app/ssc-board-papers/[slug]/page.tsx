@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import SscLibrary from "@/components/ssc/SscLibrary";
-import { BrowseHub, JsonLd, PaperIndex, PaperMatrix, QuickPapers, RelatedLinks, YearSubjects } from "@/components/ssc/Seo";
-import { BASE_PATH, LANDINGS, SSC_SITE_NAME, landingBySlug, papersInScope } from "@/components/ssc/data";
-import { profile } from "@/data/profile";
+import { LandingView, landingMetadata } from "@/components/ssc/views";
+import { LANDINGS } from "@/components/ssc/data";
 
 // One static page per year, subject, medium and paper type (e.g. /ssc-board-papers/ssc-board-paper-2025).
+// Marathi versions live under /ssc-board-papers/mr/….
 export const dynamicParams = false;
 export function generateStaticParams() {
   return LANDINGS.map((l) => ({ slug: l.slug }));
@@ -14,49 +12,9 @@ export function generateStaticParams() {
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const l = landingBySlug((await params).slug);
-  if (!l) return {};
-  const path = `${BASE_PATH}/${l.slug}`;
-  return {
-    title: l.title,
-    description: l.description,
-    applicationName: SSC_SITE_NAME,
-    alternates: { canonical: path },
-    openGraph: { type: "website", siteName: SSC_SITE_NAME, url: path, title: l.title, description: l.description, locale: "en_IN", alternateLocale: ["mr_IN"] },
-    twitter: { card: "summary_large_image", title: l.title, description: l.description },
-  };
+  return landingMetadata((await params).slug, "en");
 }
 
-
 export default async function LandingPage({ params }: Props) {
-  const { slug } = await params;
-  const l = landingBySlug(slug);
-  if (!l) notFound();
-  const path = `${BASE_PATH}/${l.slug}`;
-  const papers = papersInScope(l.scope).sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
-  return (
-    <main className="relative min-h-screen pt-3">
-      <JsonLd
-        path={path}
-        name={l.title}
-        description={l.description}
-        papers={papers}
-        crumbs={[
-          { name: "SSC Board Papers", path: BASE_PATH },
-          { name: l.h1.en, path },
-        ]}
-      />
-      <SscLibrary
-        email={profile.contact.email}
-        scope={l.scope}
-        heading={{ kicker: { en: "Maharashtra SSC · Class 10", mr: "महाराष्ट्र एसएससी · इयत्ता १०वी" }, h1: l.h1, intro: l.intro }}
-        lead={l.group === "subjectYear" ? <QuickPapers papers={papers} heading={`${l.h1.en}: all papers`} /> : undefined}
-      />
-      {l.group === "subjectYear" && l.scope.subject && l.scope.year && <RelatedLinks subject={l.scope.subject} year={l.scope.year} />}
-      {l.group === "subject" && l.scope.subject && <PaperMatrix subject={l.scope.subject} />}
-      {l.group === "year" && l.scope.year && <YearSubjects year={l.scope.year} />}
-      <BrowseHub current={l.slug} />
-      <PaperIndex papers={papers} />
-    </main>
-  );
+  return <LandingView slug={(await params).slug} lang="en" />;
 }
