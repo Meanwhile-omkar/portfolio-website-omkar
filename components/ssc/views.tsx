@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { profile } from "@/data/profile";
 import SscLibrary from "./SscLibrary";
-import { BrowseHub, Faq, JsonLd, PaperIndex, PaperMatrix, QuickPapers, RelatedLinks, YearSubjects } from "./Seo";
+import { BrowseHub, Faq, JsonLd, PaperIndex, PaperMatrix, RelatedLinks, YearSubjects } from "./Seo";
 import {
   ALL,
   SSC_SITE_NAME,
@@ -132,9 +132,6 @@ export function LandingView({ slug, lang }: { slug: string; lang: Lang }) {
         altHref={langPath(l.slug, mr ? "en" : "mr")}
         scope={l.scope}
         heading={{ kicker: { en: "Maharashtra SSC · Class 10", mr: "महाराष्ट्र एसएससी · इयत्ता १०वी" }, h1: l.h1, intro: l.intro }}
-        lead={
-          l.group === "subjectYear" ? <QuickPapers papers={papers} lang={lang} heading={mr ? `${l.h1.mr}: सर्व प्रश्नपत्रिका` : `${l.h1.en}: all papers`} /> : undefined
-        }
       />
       {l.group === "subjectYear" && l.scope.subject && l.scope.year && <RelatedLinks subject={l.scope.subject} year={l.scope.year} lang={lang} />}
       {l.group === "subject" && l.scope.subject && <PaperMatrix subject={l.scope.subject} lang={lang} />}

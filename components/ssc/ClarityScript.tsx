@@ -45,7 +45,7 @@ export default function ClarityScript() {
       const href = a.getAttribute("href") ?? "";
       if (href.includes("/ssc-board-papers/pdf/")) {
         const file = decodeURIComponent(href.split("/").pop() ?? "").replace(/\.pdf$/, "");
-        const where = a.closest("table") ? "quick_table" : a.closest("#library") ? "folder_card" : "full_list";
+        const where = a.closest("table") ? "quick_table" : a.closest("#library") ? "paper_list" : "full_list";
         if (!firstPaper) {
           firstPaper = true;
           tag("seconds_to_first_paper", Math.round((performance.now() - start) / 1000));

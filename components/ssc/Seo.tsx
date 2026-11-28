@@ -17,9 +17,9 @@ export const FAQ: { q: string; a: string; qm: string; am: string }[] = [
   },
   {
     q: "Why use this site for SSC board papers?",
-    a: "It is free with no ads, no pop-ups, no login and no sign-up. Every official paper is sorted by year, medium and subject, so any paper is about two taps away, and you can download a whole folder as one ZIP. If a paper is missing, you can request it from the form on the page.",
+    a: "It is free with no ads, no pop-ups, no login and no sign-up. Every official paper is sorted by year, medium and subject, so any paper is about two taps away, and you can download a whole group of papers as one ZIP. If a paper is missing, you can request it from the form on the page.",
     qm: "एसएससी प्रश्नपत्रिकांसाठी हीच साइट का?",
-    am: "पूर्णपणे मोफत: जाहिराती नाहीत, पॉप-अप नाहीत, लॉगिन नाही. सर्व अधिकृत प्रश्नपत्रिका वर्ष, माध्यम व विषयानुसार लावल्या आहेत, त्यामुळे कोणतीही प्रश्नपत्रिका दोन टॅपमध्ये मिळते. संपूर्ण फोल्डर एका ZIP मध्ये डाउनलोड करता येतो. एखादी प्रश्नपत्रिका नसल्यास खालील फॉर्मवरून मागा.",
+    am: "पूर्णपणे मोफत: जाहिराती नाहीत, पॉप-अप नाहीत, लॉगिन नाही. सर्व अधिकृत प्रश्नपत्रिका वर्ष, माध्यम व विषयानुसार लावल्या आहेत, त्यामुळे कोणतीही प्रश्नपत्रिका दोन टॅपमध्ये मिळते. प्रश्नपत्रिकांचा संपूर्ण गट एका ZIP मध्ये डाउनलोड करता येतो. एखादी प्रश्नपत्रिका नसल्यास खालील फॉर्मवरून मागा.",
   },
   {
     q: "Are these the official Maharashtra SSC board papers?",
@@ -202,7 +202,7 @@ export function Faq() {
 }
 
 // Plain, always-rendered list of every paper link, grouped by year/type. Keeps all PDFs crawlable
-// even though the interactive library shows them inside folders.
+// even though the interactive library shows only the first ones until "Show more".
 export function PaperIndex({ papers }: { papers: Paper[] }) {
   const groups = new Map<string, Paper[]>();
   for (const p of papers) {

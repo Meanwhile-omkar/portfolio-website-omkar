@@ -85,6 +85,41 @@ function buildFolders(list: Paper[], lang: Lang, semiOnly = false): Folder[] {
   return out;
 }
 
+// The papers list: one short heading per group ("Board Papers 2026 · English medium"), papers right under it.
+// No folders to open, so whatever the filters say is what students see straight away.
+type Group = { id: string; kind: FKind; title: string; papers: Paper[] };
+function buildGroups(list: Paper[], lang: Lang, semiOnly: boolean): Group[] {
+  return buildFolders(list, lang, semiOnly).flatMap((f) =>
+    f.subs.map((s) => ({
+      id: s.id,
+      kind: f.kind,
+      title: f.kind === "board" || f.kind === "supp" || f.kind === "prelim" ? `${f.title} · ${s.title}` : s.title,
+      papers: s.papers,
+    })),
+  );
+}
+const PAGE = 40; // papers drawn at first; "Show more" adds the rest
+const ZIP_ALL_MB = 165; // size of the whole papers repo, shown on the "Download everything" button
+
+// Old links opened a folder (?f=board-2026/board-2026-english); turn that into the matching filters.
+function filtersFromFolder(f: string, v: View) {
+  const [a, b] = f.split("/");
+  const m = a?.match(/^(board|supp)-(\d{4})$/);
+  if (m) {
+    v.kinds = [m[1]];
+    v.years = [m[2]];
+  } else if (a === "prelims") v.kinds = ["prelim"];
+  else if (a === "model-papers") v.kinds = ["model"];
+  else if (a === "question-banks") v.kinds = ["qbank"];
+  const med = b?.match(/-(english|semi-english|marathi|hindi|urdu|kannada)$/);
+  if (med) {
+    const key = MEDIUMS.find((x) => x.key.toLowerCase() === med[1].replace("-", ""))?.key;
+    if (key) v.mediums = [key];
+  }
+  const qy = b?.match(/^question-bank-(\d{4})$/);
+  if (qy) v.years = [qy[1]];
+}
+
 // Heading for the current filters, e.g. "SSC Maths 1 · Algebra Board Papers 2025 · Marathi medium".
 const KIND_TITLE: Record<Lang, Record<string, string>> = {
   en: { board: "Board Papers", supp: "Supplementary Papers", prelim: "Prelim Papers", model: "Model Papers", qbank: "Question Bank" },
@@ -108,22 +143,22 @@ function viewTitle(v: { kinds: string[]; mediums: string[]; subjects: string[]; 
 }
 
 const toggle = (set: string[], v: string) => (set.includes(v) ? set.filter((x) => x !== v) : [...set, v]);
+// Students expect a chip to pick that one thing, so by default a tap selects only it (tap it again for "All").
+// With "Pick several" switched on, taps add and remove instead (handy for a combined ZIP).
+const pick = (set: string[], v: string, several: boolean) => (several ? toggle(set, v) : set.length === 1 && set[0] === v ? [] : [v]);
 
 // ---- URL <-> view ----
-// ?type=board,supp &medium=marathi &subject=algebra,geometry &year=2025,2024 &q=… &f=board-2025/board-2025-marathi
+// ?type=board,supp &medium=marathi &subject=algebra,geometry &year=2025,2024 &q=…
 // Only values that differ from the page's starting view are written; an empty value (year=) means "all".
-type View = { kinds: string[]; mediums: string[]; subjects: string[]; years: string[]; q: string; path: string[] };
+type View = { kinds: string[]; mediums: string[]; subjects: string[]; years: string[]; q: string };
 
 function defaultView(scope: Scope): View {
-  const y = scope.year;
-  const hasMain = y ? ALL.some((p) => p.kind === "pyq" && p.year === y && p.session === "main") : false;
   return {
     kinds: scope.kind ? (scope.kind === "pyq" ? ["board", "supp"] : [scope.kind]) : [],
     mediums: scope.medium ? [scope.medium] : [],
     subjects: scope.subject ? [scope.subject] : [],
-    years: y ? [String(y)] : [],
+    years: scope.year ? [String(scope.year)] : [],
     q: "",
-    path: y ? [hasMain ? `board-${y}` : `supp-${y}`] : [],
   };
 }
 
@@ -141,13 +176,16 @@ function viewToQuery(v: View, d: View) {
   for (const k of Object.keys(URL_KEYS) as (keyof typeof URL_KEYS)[])
     if (!same(v[k], d[k])) sp.set(URL_KEYS[k], v[k].map((x) => (k === "mediums" ? x.toLowerCase() : x)).join(","));
   if (v.q.trim()) sp.set("q", v.q);
-  if (v.path.join("/") !== d.path.join("/")) sp.set("f", v.path.join("/"));
   return sp.toString().replace(/%2C/g, ",").replace(/%2F/g, "/");
 }
 
 function viewFromUrl(search: string, hash: string, d: View): View {
   const sp = new URLSearchParams(search);
-  const v: View = { ...d, kinds: [...d.kinds], mediums: [...d.mediums], subjects: [...d.subjects], years: [...d.years], path: [...d.path] };
+  const v: View = { ...d, kinds: [...d.kinds], mediums: [...d.mediums], subjects: [...d.subjects], years: [...d.years] };
+  // Older shared links: ?f=board-2026/board-2026-english (or #f=…) opened a folder; the filters say the same now.
+  const legacy = decodeURIComponent(hash.replace(/^#/, ""));
+  const f = sp.get("f") ?? (legacy.startsWith("f=") ? legacy.slice(2) : null);
+  if (f) filtersFromFolder(f, v);
   for (const k of Object.keys(URL_KEYS) as (keyof typeof URL_KEYS)[]) {
     const raw = sp.get(URL_KEYS[k]);
     if (raw === null) continue;
@@ -159,9 +197,6 @@ function viewFromUrl(search: string, hash: string, d: View): View {
       .filter((x): x is string => Boolean(x));
   }
   v.q = sp.get("q") ?? "";
-  const legacy = decodeURIComponent(hash.replace(/^#/, "")); // older links used #f=…
-  const f = sp.get("f") ?? (legacy.startsWith("f=") ? legacy.slice(2) : null);
-  if (f !== null) v.path = f.split("/").filter(Boolean).slice(0, 2);
   return v;
 }
 
@@ -190,11 +225,20 @@ export default function SscLibrary({
   const [subjects, setSubjects] = useState<string[]>(defaults.subjects);
   const [years, setYears] = useState<string[]>(defaults.years);
   const [q, setQ] = useState("");
-  // Open folder: [] = folder grid, [folder] = its sub-folders, [folder, sub] = the papers.
-  const [path, setPath] = useState<string[]>(defaults.path);
+  const [several, setSeveral] = useState(false);
+  const [limit, setLimit] = useState(PAGE);
   const [hydrated, setHydrated] = useState(false);
   const [shared, setShared] = useState(false);
   const [zip, setZip] = useState<{ d: number; n: number } | null>(null);
+  // Downloads give no sign on Android, so students tapped again and again: show a note and mark the paper ✓.
+  const [got, setGot] = useState<Set<string>>(() => new Set());
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // "Show papers ↓": students pick all their filters first (the screen does not move while they tap), then this
+  // button takes them down to the papers. It shows only after a filter changed while the papers are below the screen.
+  const [pending, setPending] = useState(false);
+  const [listBelow, setListBelow] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
   const t = T[lang];
   const mr = lang === "mr";
@@ -204,8 +248,7 @@ export default function SscLibrary({
     document.documentElement.lang = mr ? "mr" : "en";
   }, [mr]);
 
-  // Filters, search and the open folder all live in the URL (?type=…&medium=…&f=…), so any view can be
-  // copied and shared, and the phone's back button closes a folder.
+  // Filters and search live in the URL (?type=…&medium=…), so any view can be copied and shared.
   useEffect(() => {
     const read = () => {
       const v = viewFromUrl(location.search, location.hash, defaults);
@@ -214,37 +257,48 @@ export default function SscLibrary({
       setSubjects(v.subjects);
       setYears(v.years);
       setQ(v.q);
-      setPath(v.path);
+      // A shared link with several values in a row keeps "Pick several" on.
+      const multi = (["kinds", "mediums", "subjects", "years"] as const).some((k) => v[k].length > 1 && !same(v[k], defaults[k]));
+      if (multi) setSeveral(true);
       setHydrated(true);
     };
     read();
+    // Most visits come from shared links that already carry filters (?medium=…&year=…): take them straight to the papers.
+    if (/[?&](type|medium|subject|year|q|f)=/.test(location.search) || location.hash.startsWith("#f=")) {
+      setTimeout(() => {
+        const el = document.getElementById("papers");
+        if (!el || el.getBoundingClientRect().top < innerHeight * 0.6) return;
+        window.dispatchEvent(new CustomEvent("ssc-show-papers"));
+      }, 350);
+    }
+    try {
+      setGot(new Set(JSON.parse(localStorage.getItem("ssc-got") ?? "[]") as string[]));
+    } catch {}
     window.addEventListener("popstate", read);
     return () => window.removeEventListener("popstate", read);
   }, [defaults]);
-  const urlFor = useCallback(
-    (p: string[]) => {
-      const qs = viewToQuery({ kinds, mediums, subjects, years, q, path: p }, defaults);
-      return location.pathname + (qs ? `?${qs}` : "");
-    },
-    [kinds, mediums, subjects, years, q, defaults],
-  );
   useEffect(() => {
     if (!hydrated) return;
-    const next = urlFor(path);
+    const qs = viewToQuery({ kinds, mediums, subjects, years, q }, defaults);
+    const next = location.pathname + (qs ? `?${qs}` : "");
     if (next !== location.pathname + location.search || location.hash) history.replaceState(null, "", next);
-  }, [hydrated, urlFor, path]);
-  const go = useCallback(
-    (next: string[]) => {
-      setPath(next);
-      track(next.length ? "open_folder" : "back_to_all_folders", { folder: next.join("/") || undefined });
-      history.pushState(null, "", urlFor(next));
-      const el = document.getElementById("library");
-      if (el) {
-        if (lenis) lenis.scrollTo(el, { duration: 0.6 });
-        else el.scrollIntoView({ behavior: "smooth" });
-      }
+  }, [hydrated, kinds, mediums, subjects, years, q, defaults]);
+
+  const onDownload = useCallback(
+    (p: Paper) => {
+      setGot((prev) => {
+        const next = new Set(prev).add(p.path);
+        try {
+          localStorage.setItem("ssc-got", JSON.stringify([...next].slice(-300)));
+        } catch {}
+        return next;
+      });
+      const s = SUBJ[p.subject];
+      setToast(t.downloading(`${s?.[lang] ?? p.subject}${p.year ? ` ${p.year}` : ""}`));
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setToast(null), 4500);
     },
-    [lenis, urlFor],
+    [t, lang],
   );
   // Share this exact view: the phone's share sheet when there is one, otherwise copy the link.
   async function share() {
@@ -289,6 +343,7 @@ export default function SscLibrary({
       ["filter_type", "filter_medium", "filter_subject", "filter_year"].forEach((ev, i) => before[i] !== after[i] && track(ev));
       track("filters_changed", { f_type: kinds.join(","), f_medium: mediums.join(","), f_subject: subjects.join(","), f_year: years.join(",") });
       if (mediums.includes(SEMI)) track("used_semi_english");
+      setPending(true);
     }
     setLastFilters(filterKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,12 +358,43 @@ export default function SscLibrary({
     if (noResults) track("no_results", { search_text: q.trim().slice(0, 60) || undefined, f_medium: mediums.join(","), f_subject: subjects.join(","), f_year: years.join(",") });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noResults]);
-  const folders = useMemo(() => buildFolders(shown, lang, semiOnly), [shown, lang, semiOnly]);
-  const folder = folders.find((f) => f.id === path[0]);
-  const sub = folder && (folder.subs.length === 1 ? folder.subs[0] : folder.subs.find((s) => s.id === path[1]));
-  const inView = sub ? sub.papers : folder ? folder.subs.flatMap((s) => s.papers) : shown;
+  const groups = useMemo(() => buildGroups(shown, lang, semiOnly), [shown, lang, semiOnly]);
+  const inView = useMemo(() => groups.flatMap((g) => g.papers), [groups]);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        setListBelow(!e.isIntersecting && e.boundingClientRect.top > 0);
+        if (e.isIntersecting) setPending(false); // the papers are on screen already
+      },
+      { rootMargin: "0px 0px -30% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  useEffect(() => {
+    const on = () => showPapersRef.current?.(true);
+    window.addEventListener("ssc-show-papers", on);
+    return () => window.removeEventListener("ssc-show-papers", on);
+  }, []);
+  const showPapersRef = useRef<((auto?: boolean) => void) | null>(null);
+  const showPapers = (auto?: boolean) => {
+    setPending(false);
+    track(auto ? "auto_scroll_to_papers" : "show_papers", { count: shown.length });
+    const el = listRef.current;
+    if (!el) return;
+    if (lenis) {
+      lenis.resize();
+      lenis.scrollTo(el, { offset: -76, duration: 0.8 });
+    } else el.scrollIntoView({ behavior: "smooth" });
+  };
+  showPapersRef.current = showPapers;
+  // New filters start from the top of the list again.
+  useEffect(() => setLimit(PAGE), [filterKey, q]);
 
-  const yearOptions = useMemo(() => [...new Set(ALL.map((p) => p.year).filter(Boolean) as number[])].sort((a, b) => b - a), []);
+  // 2027 has only model papers (they have their own type), so it is not a year chip: students tapped it first expecting the latest board paper.
+  const yearOptions = useMemo(() => [...new Set(ALL.filter((p) => p.kind !== "model").map((p) => p.year).filter(Boolean) as number[])].sort((a, b) => b - a), []);
   const filtered = kinds.length + mediums.length + subjects.length + years.length + (q ? 1 : 0) > 0;
   // Does the view still match what this page is about? If not, the heading follows the filters instead.
   const atDefaults =
@@ -372,7 +458,9 @@ export default function SscLibrary({
   };
 
   return (
-    <div className={mr ? "ssc-mr" : ""}>
+    // data-clarity-unmask: Clarity hides digits by default, which turned "Science 1" and "2026" into "Science ▫" and
+    // "▫▫▫▫" in recordings. Nothing here is private except the contact form, which stays masked (data-clarity-mask).
+    <div className={mr ? "ssc-mr" : ""} data-clarity-unmask="true">
       <header className="sticky top-3 z-40 mx-auto flex max-w-6xl items-center justify-between gap-2 px-4">
         <a
           href={scoped ? langBase(lang) : "/"}
@@ -397,9 +485,10 @@ export default function SscLibrary({
         </a>
       </header>
 
-      <section className="relative mx-auto max-w-6xl px-4 pb-6 pt-10 md:pt-16" id="top">
-        <p className="label">{heading?.kicker?.[lang] ?? t.kicker}</p>
-        <h1 className="ssc-title mt-3 max-w-4xl text-[44px] font-semibold leading-[1.02] tracking-tight text-ink md:text-[76px]">
+      {/* On phones (94% of visitors) the top is kept short so the papers show up on the first screen. */}
+      <section className="relative mx-auto max-w-6xl px-4 pb-4 pt-5 md:pb-6 md:pt-16" id="top">
+        <p className="label hidden md:block">{heading?.kicker?.[lang] ?? t.kicker}</p>
+        <h1 className="ssc-title max-w-4xl text-[30px] font-semibold leading-[1.08] tracking-tight text-ink md:mt-3 md:text-[76px] md:leading-[1.02]">
           {custom ? (
             <span className="hl">{customTitle}</span>
           ) : heading ? (
@@ -410,17 +499,25 @@ export default function SscLibrary({
             </>
           )}
         </h1>
-        <p className="mt-5 max-w-2xl text-[17px] leading-relaxed md:text-[19px]" aria-live="polite">
-          {custom ? t.showing(shown.length) : heading ? heading.intro[lang] : t.intro}
+        <p className="mt-2 max-w-2xl text-[15px] leading-snug md:mt-5 md:text-[19px] md:leading-relaxed" aria-live="polite">
+          {custom ? (
+            t.showing(shown.length)
+          ) : (
+            <>
+              <span className="md:hidden">{heading ? "" : t.introShort}</span>
+              <span className="hidden md:inline">{heading ? heading.intro[lang] : t.intro}</span>
+            </>
+          )}
         </p>
         {!custom && lead}
-        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-medium text-ink" aria-label="Why this site">
+        <p className="mt-2 text-[13px] font-medium text-ink md:hidden">{t.trustShort}</p>
+        <ul className="mt-4 hidden flex-wrap gap-x-4 gap-y-1 text-[14px] font-medium text-ink md:flex" aria-label="Why this site">
           {t.trust.map((x) => (
             <li key={x}>{x}</li>
           ))}
         </ul>
         {!heading && (
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 hidden flex-wrap gap-3 md:flex">
             {t.stats(counts.board, counts.years, counts.practice).map((s, i) => (
               <span
                 key={s}
@@ -435,15 +532,15 @@ export default function SscLibrary({
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-24">
-        <div id="library" className="relative scroll-mt-20 rounded-3xl border-2 border-ink bg-white p-4 shadow-[5px_5px_0_#1d1d1f] md:p-7">
-          {/* filters: every row allows picking several */}
-          <div className="grid gap-4">
+        <div id="library" className="relative scroll-mt-20 rounded-3xl border-2 border-ink bg-white p-3 shadow-[5px_5px_0_#1d1d1f] md:p-7">
+          {/* Filters. On phones each row scrolls sideways so all four rows fit on one screen. */}
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:gap-4">
             <Filter label={t.type}>
               <Chip on={!kinds.length} onClick={() => setKinds([])}>
                 {t.all}
               </Chip>
               {FKINDS.map((k) => (
-                <Chip key={k} on={kinds.includes(k)} onClick={() => setKinds(toggle(kinds, k))} dot={COLOR[k]}>
+                <Chip key={k} on={kinds.includes(k)} onClick={() => setKinds(pick(kinds, k, several))} dot={COLOR[k]}>
                   {t.kinds[k]}
                 </Chip>
               ))}
@@ -453,7 +550,7 @@ export default function SscLibrary({
                 {t.all}
               </Chip>
               {MEDIUMS.map((m) => (
-                <Chip key={m.key} on={mediums.includes(m.key)} onClick={() => setMediums(toggle(mediums, m.key))}>
+                <Chip key={m.key} on={mediums.includes(m.key)} onClick={() => setMediums(pick(mediums, m.key, several))}>
                   {m[lang]}
                 </Chip>
               ))}
@@ -463,7 +560,7 @@ export default function SscLibrary({
                 {t.allSubjects}
               </Chip>
               {FILTER_SUBJECTS.map((s) => (
-                <Chip key={s.key} on={subjects.includes(s.key)} onClick={() => setSubjects(toggle(subjects, s.key))} dot={s.color}>
+                <Chip key={s.key} on={subjects.includes(s.key)} onClick={() => setSubjects(pick(subjects, s.key, several))} dot={s.color}>
                   {s[lang]}
                 </Chip>
               ))}
@@ -473,109 +570,158 @@ export default function SscLibrary({
                 {t.allYears}
               </Chip>
               {yearOptions.map((y) => (
-                <Chip key={y} on={years.includes(String(y))} onClick={() => setYears(toggle(years, String(y)))}>
+                <Chip key={y} on={years.includes(String(y))} onClick={() => setYears(pick(years, String(y), several))}>
                   {y}
                 </Chip>
               ))}
             </Filter>
-            <p className="-mt-1 text-[13px] text-ink-faint md:pl-[146px]">
-              {t.pickMany} {mediums.length > 0 && t.languageNote}
-            </p>
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-ink-soft md:pl-[146px]">
+              <label className="inline-flex cursor-pointer items-center gap-2 py-1 font-medium text-ink">
+                <input
+                  type="checkbox"
+                  checked={several}
+                  onChange={(e) => {
+                    setSeveral(e.target.checked);
+                    track("pick_several", { on: e.target.checked ? "yes" : "no" });
+                  }}
+                  className="h-4 w-4 accent-[#1d1d1f]"
+                />
+                {t.pickSeveral}
+              </label>
+              <Jump to="how" className="font-medium text-blue underline-offset-4 hover:underline">
+                ❓ {t.tipTitle}
+              </Jump>
+              {mediums.length > 0 && <span className="w-full text-ink-faint">{t.languageNote}</span>}
+            </div>
+            <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:gap-3">
               <input
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t.search}
                 aria-label={t.search}
-                className="w-full rounded-full border-2 border-ink/15 bg-mist px-5 py-2.5 text-[15px] text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-blue md:max-w-sm"
+                className="w-full rounded-full border-2 border-ink/15 bg-mist px-5 py-2 text-[15px] text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-blue md:max-w-sm md:py-2.5"
               />
-              <span className="font-mono text-[13px] text-ink-faint">{t.match(shown.length)}</span>
-              <div className="flex flex-wrap gap-2 md:ml-auto">
+              <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                <span className="mr-auto font-mono text-[13px] font-semibold text-ink md:mr-2" aria-live="polite">
+                  {t.match(shown.length)}
+                </span>
                 {filtered && (
-                  <button type="button" onClick={reset} className="btn-ghost !px-4 !py-2 !text-[14px]">
+                  <button type="button" onClick={reset} className="btn-ghost !px-3.5 !py-1.5 !text-[13px] md:!px-4 md:!py-2 md:!text-[14px]">
                     {t.reset}
                   </button>
                 )}
-                <button type="button" onClick={share} className="btn-ghost !px-4 !py-2 !text-[14px]" aria-live="polite">
-                  {shared ? t.copied : t.copyLink}
+                <button type="button" onClick={share} className="btn-ghost !px-3.5 !py-1.5 !text-[13px] md:!px-4 md:!py-2 md:!text-[14px]" aria-live="polite">
+                  {shared ? t.copied : (
+                    <>
+                      <span className="md:hidden">{t.shareShort}</span>
+                      <span className="hidden md:inline">{t.copyLink}</span>
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={() => downloadZip(inView)}
                   disabled={!inView.length || !!zip}
-                  className="btn-blue !px-4 !py-2 !text-[14px] disabled:opacity-60"
+                  className="btn-blue !px-3.5 !py-1.5 !text-[13px] disabled:opacity-60 md:!px-4 md:!py-2 md:!text-[14px]"
                 >
-                  ⬇ {zip ? t.zipping(zip.d, zip.n) : t.zipSel(inView.length)}
+                  ⬇ {zip ? t.zipping(zip.d, zip.n) : (
+                    <>
+                      <span className="md:hidden">{t.zipShortN(inView.length)}</span>
+                      <span className="hidden md:inline">{t.zipSel(inView.length)}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* breadcrumb */}
-          <nav aria-label="Folders" className="mt-7 flex flex-wrap items-center gap-1.5 font-mono text-[13px]">
-            <button type="button" onClick={() => go([])} className={path.length ? "text-blue hover:underline" : "font-semibold text-ink"}>
-              📁 {t.folders}
-            </button>
-            {folder && (
-              <>
-                <span className="text-ink-faint">/</span>
-                <button type="button" onClick={() => go([folder.id])} className={sub && folder.subs.length > 1 ? "text-blue hover:underline" : "font-semibold text-ink"}>
-                  {folder.title}
-                </button>
-              </>
-            )}
-            {sub && folder && folder.subs.length > 1 && (
-              <>
-                <span className="text-ink-faint">/</span>
-                <span className="font-semibold text-ink">{sub.title}</span>
-              </>
-            )}
-          </nav>
-
-          <div className="mt-4">
-            {!folders.length ? (
-              <div className="grid place-items-center gap-3 py-16 text-center">
+          {/* The papers themselves, straight under the filters: no folders to open or back out of. */}
+          <div ref={listRef} id="papers" className="mt-5 scroll-mt-20 border-t-2 border-dashed border-ink/15 pt-4 md:mt-7 md:pt-6">
+            {!groups.length ? (
+              <div className="grid place-items-center gap-3 py-12 text-center">
                 <p className="font-note text-[19px] text-ink">{t.empty}</p>
                 <button type="button" onClick={reset} className="btn-ghost">
                   {t.reset}
                 </button>
               </div>
-            ) : sub && folder ? (
-              <>
-                <button type="button" onClick={() => go(folder.subs.length > 1 ? [folder.id] : [])} className="mb-4 text-[14px] font-medium text-blue hover:underline">
-                  {folder.subs.length > 1 ? `← ${folder.title}` : t.back}
-                </button>
-                <ul className="grid grid-cols-2 gap-x-2.5 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
-                  {sub.papers.map((p, i) => (
-                    <Card key={p.path} p={p} lang={lang} n={i + 1} />
-                  ))}
-                </ul>
-              </>
-            ) : folder ? (
-              <>
-                <button type="button" onClick={() => go([])} className="mb-4 text-[14px] font-medium text-blue hover:underline">
-                  {t.back}
-                </button>
-                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  {folder.subs.map((s) => (
-                    <FolderTile key={s.id} title={s.title} color={COLOR[folder.kind]} label={t.count(s.papers.length)} onOpen={() => go([folder.id, s.id])} small />
-                  ))}
-                </ul>
-              </>
             ) : (
-              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {folders.map((f) => (
-                  <FolderTile key={f.id} title={f.title} color={COLOR[f.kind]} label={t.count(f.count)} tag={t.kinds[f.kind]} onOpen={() => go([f.id])} />
-                ))}
-              </ul>
+              <>
+                {(() => {
+                  let left = limit;
+                  return groups.map((g) => {
+                    if (left <= 0) return null;
+                    const ps = g.papers.slice(0, left);
+                    left -= ps.length;
+                    const mixed = new Set(g.papers.map((p) => p.medium ?? "")).size > 1;
+                    return (
+                      <div key={g.id} className="mb-6 last:mb-0">
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <h2 className="flex items-center gap-2 text-[15px] font-semibold leading-tight text-ink md:text-[17px]">
+                            <span aria-hidden className="h-3 w-3 shrink-0 rounded-sm border-2 border-ink" style={{ background: COLOR[g.kind] }} />
+                            {g.title}
+                            <span className="font-mono text-[12px] font-normal text-ink-faint">{g.papers.length}</span>
+                          </h2>
+                          {g.papers.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => downloadZip(g.papers)}
+                              disabled={!!zip}
+                              className="shrink-0 rounded-full border-2 border-ink/15 px-2.5 py-0.5 text-[12px] font-semibold text-blue hover:border-blue disabled:opacity-50"
+                              aria-label={`${t.zipSel(g.papers.length)}: ${g.title}`}
+                            >
+                              ⬇ {t.zipShort}
+                            </button>
+                          )}
+                        </div>
+                        <ul className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                          {ps.map((p, i) => (
+                            <Row key={p.path} p={p} lang={lang} n={i + 1} showMedium={mixed} saved={got.has(p.path)} onDownload={onDownload} />
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  });
+                })()}
+                {inView.length > limit && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLimit((l) => l + PAGE * 2);
+                      track("show_more", { shown: limit });
+                    }}
+                    className="btn-ghost mt-5 w-full justify-center"
+                  >
+                    {t.showMore(inView.length - limit)}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
 
+        {pending && listBelow && shown.length > 0 && !toast && (
+          <button
+            type="button"
+            onClick={() => showPapers()}
+            className="fixed inset-x-3 bottom-4 z-50 mx-auto block max-w-sm rounded-full border-2 border-ink bg-[#ffc700] px-5 py-3 text-center text-[16px] font-semibold text-ink shadow-[4px_4px_0_#1d1d1f]"
+          >
+            {t.showPapers(shown.length)}
+          </button>
+        )}
+        {toast && (
+          <div
+            role="status"
+            className="fixed inset-x-3 bottom-4 z-50 mx-auto max-w-md rounded-2xl border-2 border-ink bg-ink px-4 py-3 text-[14px] leading-snug text-white shadow-[4px_4px_0_#ffc700]"
+          >
+            ⬇ {toast}
+          </div>
+        )}
+
         <div className="mt-12 grid gap-6 md:grid-cols-[1.3fr_1fr]">
           <div
-            className="relative rounded-sm px-6 pb-7 pt-8 font-note text-[17px] leading-snug text-ink"
+            id="how"
+            className="relative scroll-mt-24 rounded-sm px-6 pb-7 pt-8 font-note text-[17px] leading-snug text-ink"
             style={{ background: "#ffe27a", transform: "rotate(-1deg)", boxShadow: "0 14px 22px -14px rgba(29,29,31,0.45)" }}
           >
             <Tape className="-top-3 left-8" color="#18a0fb" />
@@ -588,7 +734,7 @@ export default function SscLibrary({
           </div>
           <div className="flex flex-col justify-center gap-3">
             <a href={`${PAPERS_REPO}/archive/refs/heads/main.zip`} className="btn-blue justify-center">
-              ⬇ {t.zip}
+              ⬇ {t.zipAll(ZIP_ALL_MB)}
             </a>
             <Jump to="talk" className="text-center text-[14px] text-blue underline-offset-4 hover:underline">
               {t.wrong}
@@ -600,29 +746,6 @@ export default function SscLibrary({
         <p className="mt-10 max-w-3xl text-[13px] leading-relaxed text-ink-faint">{t.credits}</p>
       </section>
     </div>
-  );
-}
-
-function FolderTile({ title, color, label, tag, onOpen, small }: { title: string; color: string; label: string; tag?: string; onOpen: () => void; small?: boolean }) {
-  return (
-    <li>
-      <button type="button" onClick={onOpen} className="group relative block w-full pt-3 text-left">
-        <span aria-hidden className="absolute left-0 top-0 h-4 w-2/5 rounded-t-lg border-2 border-b-0 border-ink" style={{ background: color }} />
-        <span
-          className={`relative flex flex-col justify-between rounded-b-xl rounded-tr-xl border-2 border-ink p-3 transition-transform group-hover:-translate-y-0.5 group-hover:shadow-[4px_4px_0_#1d1d1f] ${small ? "min-h-[86px]" : "min-h-[110px]"}`}
-          style={{ background: `color-mix(in srgb, ${color} 22%, white)` }}
-        >
-          {tag && <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">{tag}</span>}
-          <span className={`font-semibold leading-tight text-ink ${small ? "text-[15px]" : "text-[16px] md:text-[18px]"}`}>{title}</span>
-          <span className="mt-2 flex items-center justify-between font-mono text-[12px] text-ink-soft">
-            {label}
-            <span aria-hidden className="text-[16px] transition-transform group-hover:translate-x-0.5">
-              →
-            </span>
-          </span>
-        </span>
-      </button>
-    </li>
   );
 }
 
@@ -649,11 +772,17 @@ function Jump({ to, className, children }: { to: string; className?: string; chi
   );
 }
 
+// One filter row. Phones: the label sits above a single line of chips that scrolls sideways, so the four rows
+// take a quarter of the screen instead of a full screen. Wider screens: chips wrap next to the label.
 function Filter({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-2 md:grid-cols-[130px_1fr] md:items-start">
-      <span className="label pt-2">{label}</span>
-      <div className="flex flex-wrap gap-2">{children}</div>
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1 md:grid-cols-[130px_minmax(0,1fr)] md:items-start md:gap-2">
+      <span className="label md:pt-2">{label}</span>
+      <div className="relative -mx-3 md:mx-0">
+        <div className="ssc-chips flex gap-2 overflow-x-auto px-3 pb-1 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">{children}</div>
+        {/* fade on the right edge hints that the row scrolls */}
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white md:hidden" />
+      </div>
     </div>
   );
 }
@@ -664,44 +793,69 @@ function Chip({ on, onClick, children, dot }: { on: boolean; onClick: () => void
       type="button"
       onClick={onClick}
       aria-pressed={on}
-      className={`inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-[13px] font-medium transition-all md:px-3.5 md:py-1.5 md:text-[14px] ${
+      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border-2 px-3 py-1.5 text-[13px] font-medium transition-all md:px-3.5 md:text-[14px] ${
         on ? "border-ink bg-ink text-white shadow-[2px_2px_0_#ffc700]" : "border-ink/15 bg-white text-ink hover:border-ink/50"
       }`}
     >
-      {dot && <span className="h-2.5 w-2.5 rounded-full" style={{ background: dot }} />}
+      {dot && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: dot }} />}
       {children}
     </button>
   );
 }
 
-function Card({ p, lang, n }: { p: Paper; lang: Lang; n: number }) {
+// One paper. The whole row opens it; the Download button saves it and says so.
+function Row({
+  p,
+  lang,
+  n,
+  showMedium,
+  saved,
+  onDownload,
+}: {
+  p: Paper;
+  lang: Lang;
+  n: number;
+  showMedium: boolean;
+  saved: boolean;
+  onDownload: (p: Paper) => void;
+}) {
   const t = T[lang];
   const s = SUBJ[p.subject];
-  const sub = p.medium ? MEDIUMS.find((m) => m.key === p.medium)?.[lang] : p.variant ? variantLabel(p.variant, lang) : "";
-  const when = p.kind === "pyq" ? `${p.session === "supplementary" ? "★ " : ""}${p.year}` : p.kind === "prelim" ? p.title.split(" - ")[0] : p.exam;
   const href = fileHref(p);
+  const when =
+    p.kind === "pyq" ? examLabel(p.exam ?? String(p.year), lang) : p.kind === "prelim" ? p.title.split(" - ")[0] : p.exam ? examLabel(p.exam, lang) : "";
+  const meta = [
+    showMedium && p.medium ? MEDIUMS.find((m) => m.key === p.medium)?.[lang] : "",
+    p.variant ? variantLabel(p.variant, lang) : "",
+    when,
+  ].filter(Boolean);
   return (
-    <li className="relative flex flex-col rounded-xl border-2 border-ink/15 bg-white p-2.5 pt-3 transition-colors hover:border-ink">
+    <li className="relative flex items-center gap-2 rounded-xl border-2 border-ink/10 bg-white py-2 pl-2 pr-1.5 transition-colors hover:border-ink md:gap-2.5 md:pl-2.5 md:pr-2">
       <span
         aria-hidden
-        className="absolute -left-1.5 -top-2 grid h-6 min-w-6 place-items-center rounded-md border-2 border-ink px-1 font-mono text-[12px] font-semibold"
+        className="grid h-6 min-w-6 shrink-0 place-items-center rounded-md border-2 border-ink px-1 font-mono text-[12px] font-semibold"
         style={{ background: s?.color ?? "#ffc700", color: "#fff", textShadow: "0 1px 0 rgba(0,0,0,.35)" }}
       >
         {n}
       </span>
-      <span className="pl-4 text-[14px] font-semibold leading-tight text-ink md:text-[15px]" title={paperName(p)}>
-        {s?.[lang] ?? p.subject}
+      <a href={href} target="_blank" rel="noopener" className="min-w-0 flex-1 after:absolute after:inset-0 after:rounded-xl" title={paperName(p)}>
+        <span className="block text-[14px] font-semibold leading-tight text-ink md:text-[15px]">{s?.[lang] ?? p.subject}</span>
+        {meta.length > 0 && (
+          <span className={`mt-0.5 block text-[12px] leading-tight ${p.session === "supplementary" ? "text-orange" : "text-ink-soft"}`}>{meta.join(" · ")}</span>
+        )}
+      </a>
+      <span aria-hidden className="shrink-0 rounded-lg bg-mist px-2 py-2 text-[12px] font-semibold text-blue md:text-[13px]">
+        {t.view}
       </span>
-      {sub && <span className="pl-4 text-[12px] leading-tight text-ink-soft">{sub}</span>}
-      <span className={`mt-1 pl-4 font-mono text-[11px] ${p.session === "supplementary" ? "text-orange" : "text-ink-faint"}`}>{when}</span>
-      <span className="mt-2 flex gap-1.5">
-        <a href={href} target="_blank" rel="noopener" className="flex-1 whitespace-nowrap rounded-lg bg-mist px-1 py-1.5 text-center text-[12px] font-semibold text-blue hover:bg-blue hover:text-white">
-          {t.view}
-        </a>
-        <a href={href} download className="flex-[1.5] whitespace-nowrap rounded-lg bg-ink px-1 py-1.5 text-center text-[12px] font-semibold text-white hover:bg-blue" aria-label={`${t.download}: ${paperName(p)}`}>
-          ⬇ {t.download}
-        </a>
-      </span>
+      <a
+        href={href}
+        download
+        onClick={() => onDownload(p)}
+        className={`relative z-10 shrink-0 whitespace-nowrap rounded-lg px-2 py-2 text-[12px] font-semibold md:px-2.5 md:text-[13px] hover:bg-blue hover:text-white ${saved ? "bg-green text-ink" : "bg-ink text-white"}`}
+        aria-label={`${t.download}: ${paperName(p)}`}
+      >
+        {saved ? `✓ ${t.saved}` : `⬇ ${t.download}`}
+      </a>
     </li>
   );
 }

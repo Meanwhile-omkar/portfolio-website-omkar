@@ -112,6 +112,14 @@
     letter-spacing: 0;
     font-family: var(--font-deva), system-ui, sans-serif;
   }
+  /* Filter chip rows scroll sideways on phones; hide the scrollbar (the fade on the right shows there is more). */
+  .ssc-chips {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ssc-chips::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {
